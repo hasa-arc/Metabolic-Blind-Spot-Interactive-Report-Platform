@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The Metabolic Blind Spot: Interactive Biomedical Simulation Platform.">
+    <title>The Metabolic Blind Spot | IEEE-SEU SB presents REACT 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F2C59',
+                        secondary: '#003366',
+                        danger: '#D9534F',
+                        success: '#2E7D32',
+                        amber: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #0F2C59;
+            --primary-light: #1A3F7A;
+            --secondary: #003366;
+            --danger: #D9534F;
+            --success: #2E7D32;
+            --bg: #FAFAFA;
+            --fg: #2D3748;
+            --muted: #4A5568;
+            --card: #ffffff;
+            --border: #E2E8F0;
+            --ring: #3B82F6;
+        }
+        .dark {
+            --bg: #0B1120;
+            --fg: #E2E8F0;
+            --card: #0F172A;
+            --muted: #94A3B8;
+            --border: #1E293B;
+            --ring: #60A5FA;
+        }
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            max-height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .chart-container-sm {
+            height: 200px;
+            max-height: 240px;
+        }
+        @media (min-width: 768px) {
+            .chart-container-sm {
+                height: 220px;
+            }
+        }
+        .tab-btn {
+            position: relative;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            color: #64748B;
+        }
+        .tab-btn:hover {
+            background: #F1F5F9;
+            color: var(--primary);
+        }
+        .dark .tab-btn:hover {
+            background: #1E293B;
+            color: #93C5FD;
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            background: #EFF6FF;
+            border-bottom: 3px solid var(--primary);
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        .dark .tab-btn.active {
+            color: #93C5FD;
+            background: rgba(59, 130, 246, 0.15);
+            border-bottom-color: #93C5FD;
+        }
+        .tab-btn .tab-icon {
+            margin-right: 0.4rem;
+            font-size: 0.8rem;
+        }
+        .card-hover {
+            transition: all 0.25s ease;
+            border: 1px solid #E2E8F0;
+        }
+        .dark .card-hover {
+            border-color: #1E293B;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(15, 44, 89, 0.10);
+            border-color: var(--primary-light);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            border-color: #3B82F6;
+        }
+        .ref-item {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .ref-item:hover {
+            border-left-color: var(--primary);
+            background: #F8FAFC;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .dark .ref-item:hover {
+            background: #1E293B;
+            border-left-color: #3B82F6;
+        }
+        .credit-badge {
+            display: inline-block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            margin: 0.15rem 0.2rem;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+        .credit-badge.conceptualization {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        .dark .credit-badge.conceptualization {
+            background: #1E3A8A;
+            color: #93C5FD;
+        }
+        .credit-badge.kinetic {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        .dark .credit-badge.kinetic {
+            background: #064E3B;
+            color: #6EE7B7;
+        }
+        .credit-badge.writing {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        .dark .credit-badge.writing {
+            background: #78350F;
+            color: #FCD34D;
+        }
+        .credit-badge.data {
+            background: #E0E7FF;
+            color: #3730A3;
+        }
+        .dark .credit-badge.data {
+            background: #312E81;
+            color: #A5B4FC;
+        }
+        .credit-badge.curation {
+            background: #FCE4EC;
+            color: #9A1F4A;
+        }
+        .dark .credit-badge.curation {
+            background: #831843;
+            color: #F9A8D4;
+        }
+        .keyword-tag {
+            display: inline-block;
+            background: #E0E7FF;
+            color: #3730A3;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.2rem 0.7rem;
+            border-radius: 9999px;
+            margin: 0.15rem 0.2rem;
+            transition: all 0.15s ease;
+        }
+        .keyword-tag:hover {
+            background: #C7D2FE;
+            transform: scale(1.04);
+        }
+        .dark .keyword-tag {
+            background: #1E1B4B;
+            color: #A5B4FC;
+        }
+        .doi-badge {
+            display: inline-block;
+            background: #F1F5F9;
+            color: #475569;
+            font-size: 0.6rem;
+            font-family: 'Courier New', monospace;
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+        }
+        .dark .doi-badge {
+            background: #1E293B;
+            color: #94A3B8;
+            border-color: #334155;
+        }
+        .timeline-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        .dark .timeline-dot {
+            border-color: #0F172A;
+            box-shadow: 0 0 0 2px #3B82F6;
+        }
+        .scenario-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .scenario-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .efficacy-bar {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast {
+            transform: translateX(120%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .progress-bar {
+            height: 3px;
+            background: linear-gradient(90deg, #0F2C59, #3B82F6, #0F2C59);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 60;
+            transition: width 0.1s linear;
+        }
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+            100% {
+                background-position: -200% 0;
+            }
+        }
+        @media print {
+            nav,
+            footer,
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: #fff;
+                color: #000;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+            main {
+                padding: 0;
+            }
+            section {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        .focus-ring:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+        }
+        .dark .focus-ring:focus {
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.4);
+        }
+        #cellCanvas {
+            width: 100%;
+            height: 280px;
+            display: block;
+        }
+        @media (min-width: 768px) {
+            #cellCanvas {
+                height: 320px;
+            }
+        }
+        .glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.85);
+        }
+        .light .glass {
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        .matrix-table th {
+            background: #F1F5F9;
+            color: var(--primary);
+            font-weight: 700;
+            padding: 0.6rem 0.8rem;
+            text-align: left;
+            border-bottom: 2px solid #E2E8F0;
+        }
+        .dark .matrix-table th {
+            background: #1E293B;
+            color: #93C5FD;
+            border-bottom-color: #334155;
+        }
+        .matrix-table td {
+            padding: 0.5rem 0.8rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        .dark .matrix-table td {
+            border-bottom-color: #1E293B;
+        }
+        .matrix-table tr:hover td {
+            background: #F8FAFC;
+        }
+        .dark .matrix-table tr:hover td {
+            background: #1E293B;
+        }
+        .abstract-body p {
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+        .abstract-body strong {
+            color: var(--primary);
+        }
+        .dark .abstract-body strong {
+            color: #93C5FD;
+        }
+        .footer-link {
+            color: #93C5FD;
+            transition: color 0.15s ease;
+        }
+        .footer-link:hover {
+            color: white;
+        }
+        #compareOverlay canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .help-btn {
+            position: fixed;
+            bottom: 6rem;
+            right: 1.5rem;
+            z-index: 50;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--fg);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+        .help-btn:hover {
+            transform: scale(1.05);
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .help-tooltip {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            right: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            min-width: 200px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            font-size: 0.7rem;
+            line-height: 1.6;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform: translateY(8px);
+        }
+        .help-btn:hover .help-tooltip {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen flex flex-col transition-colors duration-300">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded">Skip to main content</a>
+
+    <div class="progress-bar" id="progressBar"></div>
+
+    <button id="backToTop" class="fixed bottom-6 right-6 z-50 bg-[#0F2C59] dark:bg-blue-600 text-white p-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300 hover:bg-[#003366] dark:hover:bg-blue-700 focus-ring no-print" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <div class="help-btn no-print">
+        <i class="fas fa-question"></i>
+        <div class="help-tooltip">
+            <strong>Keyboard Shortcuts</strong><br>
+            <kbd>Ctrl+D</kbd> Toggle Dark Mode<br>
+            <kbd>Ctrl+E</kbd> Export Simulation<br>
+            <kbd>1-7</kbd> Switch Tabs
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed top-20 right-4 z-50 space-y-2 no-print"></div>
+
+    <header class="bg-[#0F2C59] text-white shadow-lg border-b-4 border-[#003366]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span class="bg-[#D9534F] text-white text-[0.6rem] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"><i class="fas fa-microscope mr-1"></i> Track : Smart Healthcare & Biomedical Engineering</span>
+                        <span class="bg-[#003366] text-blue-100 text-[0.6rem] font-semibold px-2.5 py-0.5 rounded-full"><i class="fas fa-flask mr-1"></i> Project OmpF Pathway</span>
+                        <span class="bg-amber-500 text-[#0F2C59] text-[0.6rem] font-bold px-2.5 py-0.5 rounded-full"><i class="fas fa-code mr-1"></i> Metabolic Blind Spot Interactive Report Platform</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">The Metabolic Blind Spot</h1>
+                    <p class="text-blue-200 text-sm sm:text-base mt-1 max-w-4xl">How Nutrient-Driven Resistance States and Cryptic Gene Activation Undermine Standard Antimicrobial Susceptibility Testing</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="darkModeToggle" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors focus-ring" aria-label="Toggle dark mode" title="Toggle dark mode (Ctrl+D)">
+                        <i id="moonIcon" class="fas fa-moon hidden"></i>
+                        <i id="sunIcon" class="fas fa-sun"></i>
+                    </button>
+                    <div class="bg-[#003366]/60 p-3 rounded-lg border border-blue-400/30 text-xs text-blue-100 min-w-[220px]">
+                        <p class="font-bold text-white mb-1"><i class="fas fa-users mr-1"></i> Authors:</p>
+                        <p>Muhammad Tasnimul Hasan* [Hasan, M.T]</p>
+                        <p>Umme Humayra Shahrin [Shahrin, U.H]</p>
+                        <p class="text-blue-300 text-[0.6rem] mt-0.5"> Department of Conputer Science & Engineering</p>
+                        <p class="text-blue-300 text-[0.6rem] mt-0.5"> Manarat International University, Bangladesh</p>
+                        <p class="text-[0.55rem] text-blue-200 mt-1 font-mono"><i class="fas fa-envelope mr-1"></i> <a href="mailto:muhammadtasnimulhasan01@gmail.com" class="hover:underline">muhammadtasnimulhasan01@gmail.com</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="bg-white/80 dark:bg-slate-900/80 glass border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 no-scrollbar">
+                <button onclick="switchTab('executive')" id="tab-executive" class="tab-btn active" aria-selected="true" role="tab"><i class="fas fa-chart-pie tab-icon"></i> Executive Summary</button>
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn" aria-selected="false" role="tab"><i class="fas fa-exclamation-triangle tab-icon"></i> AMR Void</button>
+                <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn" aria-selected="false" role="tab"><i class="fas fa-sliders-h tab-icon"></i> Predictive Simulator</button>
+                <button onclick="switchTab('mechanisms')" id="tab-mechanisms" class="tab-btn" aria-selected="false" role="tab"><i class="fas fa-lock tab-icon"></i> Mechanistic Framework</button>
+                <button onclick="switchTab('solutions')" id="tab-solutions" class="tab-btn" aria-selected="false" role="tab"><i class="fas fa-microchip tab-icon"></i> BioMed-Solutions</button>
+                <button onclick="switchTab('references')" id="tab-references" class="tab-btn" aria-selected="false" role="tab"><i class="fas fa-book tab-icon"></i> References</button>
+                <button onclick="switchTab('authors')" id="tab-authors" class="tab-btn" aria-selected="false" role="tab"><i class="fas fa-user-graduate tab-icon"></i> Abstract & Contributions</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- EXECUTIVE SUMMARY -->
+        <section id="sec-executive" class="space-y-8 fade-in-up visible">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="card p-5 rounded-xl border-l-4 border-l-[#D9534F] shadow-sm card-hover">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Global AMR Burden</span><i class="fas fa-skull-crossbones text-[#D9534F] text-lg"></i></div>
+                    <div class="text-3xl font-extrabold text-[#D9534F] mt-1">10 Million+</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Annual deaths projected by 2050</div>
+                </div>
+                <div class="card p-5 rounded-xl border-l-4 border-l-[#0F2C59] shadow-sm card-hover">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Diagnostic Standard</span><i class="fas fa-vial text-[#0F2C59] dark:text-blue-300 text-lg"></i></div>
+                    <div class="text-xl font-extrabold text-[#0F2C59] dark:text-blue-300 mt-1">Mueller-Hinton Broth</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Hyper-nutritious → artificial susceptibility</div>
+                </div>
+                <div class="card p-5 rounded-xl border-l-4 border-l-amber-500 shadow-sm card-hover">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Clinical Disconnect</span><i class="fas fa-times-circle text-amber-500 text-lg"></i></div>
+                    <div class="text-xl font-extrabold text-amber-600 mt-1">False Susceptibility</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Lab <q>Sensitive</q> ≠ Host Efficacy</div>
+                </div>
+                <div class="card p-5 rounded-xl border-l-4 border-l-[#2E7D32] shadow-sm card-hover">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Plasmid Amplification</span><i class="fas fa-dna text-[#2E7D32] text-lg"></i></div>
+                    <div class="text-xl font-extrabold text-[#2E7D32] mt-1">3× – 89× PCN</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Cryptic gene dosage surge in host</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-gradient-to-br from-[#0F2C59] to-[#003366] p-6 rounded-xl text-white shadow-md">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-amber-400 mb-2"><i class="fas fa-quote-left mr-2"></i> Core Diagnostic Imperative</h3>
+                    <p class="text-base sm:text-lg font-semibold italic leading-snug">&ldquo;Metabolic state is not a confounding variable in antimicrobial testing; it is the definitive variable governing bacterial survival <em>in vivo</em>.&rdquo;</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="bg-white/10 px-3 py-1 rounded-full text-xs">Two-Mechanism Model</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full text-xs">OmpF Porin Gating</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full text-xs">Cryptic Gene Activation</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full text-xs">Host-Mimicking Diagnostics</span>
+                    </div>
+                </div>
+                <div class="card p-6 rounded-xl shadow-sm card-hover">
+                    <h4 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-file-alt mr-2 text-[#D9534F]"></i> Abstract Snapshot</h4>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">Standard MIC assays in hyper-nutritious Mueller-Hinton broth fail to replicate host gut conditions. We establish resistance as a <strong>metabolically conditional phenotype</strong> governed by two mechanisms: OmpF porin closure and cryptic gene derepression via ppGpp.</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <span class="text-xs font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300">V<sub>in</sub> ≈ 4(V<sub>e</sub> + V<sub>h</sub>)</span>
+                        <span class="text-xs text-slate-400 dark:text-slate-500 ml-2">Kinetic threshold at MIC</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research Trajectory – Mentor-Approved Framework -->
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-4">
+                    <i class="fas fa-timeline mr-2 text-[#D9534F]"></i> Research Trajectory: From Flaw to Solution
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    
+                    <!-- Step 1: WHAT? -->
+                    <div class="text-center p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-full bg-[#D9534F] text-white flex items-center justify-center text-sm font-bold mx-auto mb-2 shadow-md">1</div>
+                        <span class="text-sm font-extrabold text-[#D9534F] block">WHAT?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 leading-tight font-semibold">Diagnostic Gap</p>
+                        <p class="text-[0.5rem] text-slate-500 dark:text-slate-500 leading-tight mt-0.5">AST tests lab media, not the patient</p>
+                    </div>
+
+                    <!-- Step 2: HOW? -->
+                    <div class="text-center p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold mx-auto mb-2 shadow-md">2</div>
+                        <span class="text-sm font-extrabold text-amber-600 block">HOW?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 leading-tight font-semibold">Molecular Mechanisms</p>
+                        <p class="text-[0.5rem] text-slate-500 dark:text-slate-500 leading-tight mt-0.5">Porin closure + gene derepression</p>
+                    </div>
+
+                    <!-- Step 3: WHY? -->
+                    <div class="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-full bg-[#003366] text-white flex items-center justify-center text-sm font-bold mx-auto mb-2 shadow-md">3</div>
+                        <span class="text-sm font-extrabold text-[#003366] dark:text-blue-300 block">WHY?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 leading-tight font-semibold">Clinical Failure</p>
+                        <p class="text-[0.5rem] text-slate-500 dark:text-slate-500 leading-tight mt-0.5">V<sub>in</sub> ≈ 4(V<sub>e</sub> + V<sub>h</sub>)</p>
+                    </div>
+
+                    <!-- Step 4: WHEN? -->
+                    <div class="text-center p-3 rounded-lg bg-teal-50 dark:bg-teal-900/10 border border-teal-200 dark:border-teal-800/30 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center text-sm font-bold mx-auto mb-2 shadow-md">4</div>
+                        <span class="text-sm font-extrabold text-teal-600 block">WHEN?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 leading-tight font-semibold">Environment Split</p>
+                        <p class="text-[0.5rem] text-slate-500 dark:text-slate-500 leading-tight mt-0.5">Lab vs. Host Gut</p>
+                    </div>
+
+                    <!-- Step 5: WHAT NOW? -->
+                    <div class="text-center p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/30 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-sm font-bold mx-auto mb-2 shadow-md">5</div>
+                        <span class="text-sm font-extrabold text-[#2E7D32] block">WHAT NOW?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 leading-tight font-semibold">Biomedical Action</p>
+                        <p class="text-[0.5rem] text-slate-500 dark:text-slate-500 leading-tight mt-0.5">4 concrete innovations</p>
+                    </div>
+
+                    <!-- Step 6: SO WHAT? -->
+                    <div class="text-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800/30 hover:shadow-md transition-shadow">
+                        <div class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold mx-auto mb-2 shadow-md">6</div>
+                        <span class="text-sm font-extrabold text-purple-600 block">SO WHAT?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 leading-tight font-semibold">Metabolic State</p>
+                        <p class="text-[0.5rem] text-slate-500 dark:text-slate-500 leading-tight mt-0.5">The variable, not confounding</p>
+                    </div>
+
+                </div>
+
+                <!-- Optional: Arrow connectors for visual flow -->
+                <div class="hidden md:flex justify-between items-center px-4 mt-2 text-slate-300 dark:text-slate-600">
+                    <span class="text-xs">⟶</span>
+                    <span class="text-xs">⟶</span>
+                    <span class="text-xs">⟶</span>
+                    <span class="text-xs">⟶</span>
+                    <span class="text-xs">⟶</span>
+                </div>
+            </div>
+        </section>
+
+<!-- AMR VOID – Mentor-Approved Framework -->
+<section id="sec-overview" class="hidden space-y-6 fade-in-up">
+    
+    <!-- Section Header -->
+    <div class="card p-6 rounded-xl shadow-sm">
+        <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2">
+            <i class="fas fa-exclamation-triangle text-[#D9534F] mr-2"></i> 
+            The Global AMR Crisis & Diagnostic Limitations
+        </h2>
+        <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm sm:text-base">
+            Standard Antimicrobial Susceptibility Testing (AST) relies on hyper-nutritious Mueller-Hinton broth. 
+            Inside the human body, particularly the gastrointestinal tract, bacteria encounter severe nutrient constraints 
+            that trigger metabolically conditional resistance states, producing dangerous <strong>false susceptibility</strong> scores.
+        </p>
+    </div>
+
+    <!-- Grid: Left (WHAT + HOW + WHY) | Right (WHEN + WHAT NOW + SO WHAT + Chart) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+        <!-- ===== LEFT COLUMN ===== -->
+        <div class="lg:col-span-6 space-y-6">
+
+            <!-- WHAT? – The Flaw -->
+            <div class="card p-5 rounded-xl shadow-sm border-l-4 border-l-[#D9534F] card-hover">
+                <h3 class="text-sm font-bold text-[#D9534F] flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-[#D9534F] text-white flex items-center justify-center text-[0.6rem] font-bold">1</span>
+                    The Flaw - WHAT
+                </h3>
+                <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mt-1">
+                    Antimicrobial resistance is conventionally treated as a static, genetically encoded trait. 
+                    <strong>This is wrong.</strong> Resistance is a <strong>metabolically conditional phenotype</strong> 
+                    – regulated by environmental nutrient availability, not just mutations.
+                </p>
+                <ul class="mt-3 space-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                    <li class="flex items-start gap-2">
+                        <span class="text-[#D9534F] font-bold text-lg leading-none">✕</span>
+                        <div><strong>Standard AST Flaw:</strong> Mueller-Hinton broth forces metabolic hyper-activation, artificially inflating OmpF porin density and influx kinetics (V<sub>in</sub>).</div>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-[#2E7D32] font-bold text-lg leading-none">✓</span>
+                        <div><strong>Host Reality:</strong> Nutrient-constrained niches cause OmpF porin closure and derepress silent plasmid-encoded resistance genes (<em>tetA</em>, <em>aadA</em>).</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- HOW? – The Mechanisms -->
+            <div class="card p-5 rounded-xl shadow-sm border-l-4 border-l-amber-500 card-hover">
+                <h3 class="text-sm font-bold text-amber-600 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[0.6rem] font-bold">2</span>
+                    The Molecular Mechanisms - HOW
+                </h3>
+                <div class="mt-2 space-y-3">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <p class="text-xs font-bold text-[#003366] dark:text-blue-300">Mechanism 1 – Membrane Permeability</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-0.5">
+                            Glutamine depletion triggers <strong>CpxA/R signaling</strong> (Glutamine → Inosine → CpxA-P → OmpR → OmpF ↓), 
+                            closing OmpF porin channels and excluding β-lactams, tetracyclines, and aminoglycosides.
+                        </p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <p class="text-xs font-bold text-[#D9534F] dark:text-red-300">Mechanism 2 – Cryptic Gene Derepression</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-0.5">
+                            Host starvation activates the alarmone <strong>ppGpp</strong>, which derepresses silent resistance genes 
+                            (<em>tetA</em>, <em>aadA</em>) and drives <strong>Plasmid Copy Number (PCN) amplification</strong> (3×–89×).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WHY? – The Math & Failure -->
+            <div class="card p-5 rounded-xl shadow-sm border-l-4 border-l-[#003366] card-hover">
+                <h3 class="text-sm font-bold text-[#003366] dark:text-blue-300 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-[#003366] text-white flex items-center justify-center text-[0.6rem] font-bold">3</span>
+                    The Math & Diagnostic Failure - WHY
+                </h3>
+                <div class="mt-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
+                    <p class="text-xs font-mono font-bold text-[#003366] dark:text-blue-300">
+                        V<sub>in</sub> ≈ 4(V<sub>e</sub> + V<sub>h</sub>)
+                    </p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                        Influx velocity is tightly coupled to clearance. A marginal porin reduction excludes enough antibiotic 
+                        to confer resistance – <strong>without any genetic mutation</strong>.
+                    </p>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-2">
+                    <strong>False Susceptibility:</strong> Lab media force porins open and keep silent genes off, 
+                    generating dangerous "false susceptible" lab reports for pathogens that actively survive inside the body.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- ===== RIGHT COLUMN ===== -->
+        <div class="lg:col-span-6 space-y-6">
+
+            <!-- WHEN? – The Environment Split -->
+            <div class="card p-5 rounded-xl shadow-sm border-l-4 border-l-teal-500 card-hover">
+                <h3 class="text-sm font-bold text-teal-600 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-teal-500 text-white flex items-center justify-center text-[0.6rem] font-bold">4</span>
+                    The Environment Split - WHEN
+                </h3>
+                <div class="overflow-x-auto mt-2">
+                    <table class="w-full text-[0.6rem] border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 dark:bg-slate-800">
+                                <th class="p-2 text-left font-bold text-slate-700 dark:text-slate-300">Environment</th>
+                                <th class="p-2 text-left font-bold text-slate-700 dark:text-slate-300">Glutamine</th>
+                                <th class="p-2 text-left font-bold text-slate-700 dark:text-slate-300">OmpF</th>
+                                <th class="p-2 text-left font-bold text-slate-700 dark:text-slate-300">Silent Genes</th>
+                                <th class="p-2 text-left font-bold text-slate-700 dark:text-slate-300">Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-slate-200 dark:border-slate-700">
+                                <td class="p-2 font-semibold text-slate-800 dark:text-slate-200">Lab (Mueller-Hinton)</td>
+                                <td class="p-2 text-emerald-600 dark:text-emerald-400">High</td>
+                                <td class="p-2">Open</td>
+                                <td class="p-2">Locked (H-NS)</td>
+                                <td class="p-2 font-bold text-[#D9534F]">Artificial Sensitivity</td>
+                            </tr>
+                            <tr class="bg-red-50/30 dark:bg-red-900/5">
+                                <td class="p-2 font-semibold text-slate-800 dark:text-slate-200">Patient (Host Gut)</td>
+                                <td class="p-2 text-red-600 dark:text-red-400">Low</td>
+                                <td class="p-2 text-red-600 dark:text-red-400">Closed</td>
+                                <td class="p-2 text-red-600 dark:text-red-400">Activated (ppGpp)</td>
+                                <td class="p-2 font-bold text-red-600 dark:text-red-400">Clinical Resistance</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- WHAT NOW? + SO WHAT? (Combined) -->
+            <div class="card p-5 rounded-xl shadow-sm border-l-4 border-l-[#2E7D32] card-hover">
+                <h3 class="text-sm font-bold text-[#2E7D32] flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-[0.6rem] font-bold">5</span>
+                    Biomedical Action - WHAT NOW
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                    Biomedical engineering must bridge this diagnostic void through <strong>4 concrete innovations</strong>:
+                </p>
+                <ul class="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+                    <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">①</span> <strong>Host-Mimicking Media (HMDM):</strong>Replace Mueller-Hinton broth with gut-relevant nutrients</li>
+                    <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">②</span> <strong>Bio-MEMS Single-Cell Assays:</strong>Real-time V<sub>in</sub> vs. clearance kinetics</li>
+                    <li class="flex items-start gap-2"><span class="text-purple-500 font-bold">③</span> <strong>Metabolomic Adjuvants:</strong>Exogenous glutamine to force OmpF open</li>
+                    <li class="flex items-start gap-2"><span class="text-indigo-500 font-bold">④</span> <strong>Computational Flux Modeling:</strong>Predictive patient-specific algorithms</li>
+                </ul>
+            </div>
+
+            <!-- SO WHAT? – The Punchline -->
+            <div class="card p-5 rounded-xl shadow-sm border-l-4 border-l-purple-600 bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-transparent">
+                <h3 class="text-sm font-bold text-purple-600 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[0.6rem] font-bold">6</span>
+                    The Bottom Line - SO WHAT
+                </h3>
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-relaxed mt-1">
+                    "Metabolic state is not a confounding variable in diagnostic testing – <span class="text-purple-600">it is the variable.</span>"
+                </p>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-1">
+                    Pathogens classified as susceptible in the lab routinely kill patients in the ward because standard tests ignore host physiology.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chart: Comparative Diagnostic Paradigm -->
+    <div class="card p-6 rounded-xl shadow-sm">
+        <h3 class="text-base font-bold text-[#003366] dark:text-blue-300 mb-2">
+            <i class="fas fa-chart-bar mr-2 text-[#D9534F]"></i> Comparative Diagnostic Paradigm
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Mueller-Hinton Broth vs. Host Gut Metabolomic Conditions</p>
+        <div class="chart-container">
+            <canvas id="astComparisonChart"></canvas>
+        </div>
+    </div>
+
+</section>
+
+        <!-- Predictive SIMULATOR -->
+        <section id="sec-simulator" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6 rounded-xl shadow-sm">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-1"><i class="fas fa-sliders-h text-[#003366] mr-2"></i> Predictive Simulator</h2>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Adjust sliders, click <strong>Scenario Presets</strong>, or toggle <strong>Comparison Mode</strong> to predict bacterial population dynamics in real-time. Share your simulation via URL. The simulator is a <strong>mathematical model</strong> that translates the <strong>biological mechanisms</strong> from the research into <strong>real-time visual feedback</strong>. It answers the question: If I change the environment (glutamine, starvation, antibiotic), what happens to the bacteria?</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 no-print">
+                        <button onclick="resetSimulation()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus-ring" title="Reset to default values"><i class="fas fa-undo mr-1"></i> Reset</button>
+                        <button onclick="toggleComparisonMode()" id="compareBtn" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus-ring"><i class="fas fa-flask mr-1"></i> Compare Lab vs Host</button>
+                        <button onclick="exportSimulation()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus-ring" title="Export data (Ctrl+E)"><i class="fas fa-download mr-1"></i> Export Data</button>
+                        <button onclick="shareSimulation()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus-ring"><i class="fas fa-link mr-1"></i> Share URL</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Controls -->
+                <div class="lg:col-span-4 card p-5 rounded-xl shadow-sm space-y-5">
+                    <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 border-b border-slate-200 dark:border-slate-700 pb-2"><i class="fas fa-sliders-h text-[#D9534F] mr-2"></i> Environmental Controls</h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400"> <strong>If I change the environment (glutamine, starvation, antibiotic), what happens to the bacteria?</strong> </p>
+
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5"><i class="fas fa-bolt mr-1"></i> Scenario Presets (V4.0)</p>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <button onclick="setScenario(80,15,50)" class="scenario-btn text-[11px] font-semibold px-2 py-1.5 rounded bg-blue-50 dark:bg-blue-900/30 text-[#003366] dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 focus-ring" title="Rich media, low starvation, moderate antibiotic – typical lab AST"><i class="fas fa-flask mr-1"></i> Lab Control</button>
+                            <button onclick="setScenario(15,75,40)" class="scenario-btn text-[11px] font-semibold px-2 py-1.5 rounded bg-red-50 dark:bg-red-900/30 text-[#D9534F] dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 focus-ring" title="Low glutamine, high starvation, moderate drug – mimics gut infection"><i class="fas fa-bacteria mr-1"></i> Gut Infection</button>
+                            <button onclick="setScenario(30,85,90)" class="scenario-btn text-[11px] font-semibold px-2 py-1.5 rounded bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 focus-ring" title="Aggressive high-dose antibiotic therapy"><i class="fas fa-syringe mr-1"></i> High Dose Therapy</button>
+                            <button onclick="setScenario(60,60,80)" class="scenario-btn text-[11px] font-semibold px-2 py-1.5 rounded bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 focus-ring" title="Moderate glutamine, partial starvation, high drug – combination approach"><i class="fas fa-pills mr-1"></i> Combo Therapy</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs"><label class="font-bold text-slate-700 dark:text-slate-300">Glutamine (Mechanism 1)</label><span id="val-glutamine" class="font-mono font-bold text-[#003366] dark:text-blue-300">80%</span></div>
+                        <input type="range" id="input-glutamine" min="0" max="100" value="80" class="w-full accent-[#003366] cursor-pointer" oninput="updateSimulation()" aria-label="Glutamine level">
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs"><label class="font-bold text-slate-700 dark:text-slate-300">Starvation / ppGpp (Mechanism 2)</label><span id="val-starvation" class="font-mono font-bold text-[#D9534F] dark:text-red-300">15%</span></div>
+                        <input type="range" id="input-starvation" min="0" max="100" value="15" class="w-full accent-[#D9534F] cursor-pointer" oninput="updateSimulation()" aria-label="Starvation level">
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs"><label class="font-bold text-slate-700 dark:text-slate-300">Antibiotic Dosage (µg/mL)</label><span id="val-antibiotic" class="font-mono font-bold text-slate-800 dark:text-slate-200">50</span></div>
+                        <input type="range" id="input-antibiotic" min="10" max="100" value="50" class="w-full accent-slate-700 dark:accent-slate-400 cursor-pointer" oninput="updateSimulation()" aria-label="Antibiotic dosage">
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                        <div class="flex justify-between items-center"><span class="text-slate-600 dark:text-slate-400">OmpF Gate</span><span id="status-porin" class="font-bold text-[#2E7D32]">OPEN</span></div>
+                        <div class="flex justify-between items-center"><span class="text-slate-600 dark:text-slate-400">Plasmid PCN</span><span id="status-pcn" class="font-bold text-slate-800 dark:text-slate-200">1x</span></div>
+                        <div class="flex justify-between items-center"><span class="text-slate-600 dark:text-slate-400">Influx (V<sub>in</sub>)</span><span id="status-vin" class="font-bold text-blue-700 dark:text-blue-300">High</span></div>
+                        <div class="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-1"><span class="font-bold text-slate-700 dark:text-slate-300">AST Score (Lab)</span><span id="status-ast" class="font-bold px-2 py-0.5 rounded text-white bg-[#2E7D32] text-[11px]">SUSCEPTIBLE</span></div>
+                        <div class="flex justify-between items-center"><span class="font-bold text-slate-700 dark:text-slate-300">Host Efficacy</span><span id="status-host" class="font-bold px-2 py-0.5 rounded text-white bg-[#2E7D32] text-[11px]">KILLING</span></div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[10px] text-slate-500 dark:text-slate-400"><span>Clinical Efficacy</span><span id="efficacy-label" class="font-bold text-slate-700 dark:text-slate-300">75%</span></div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden"><div id="efficacy-bar" class="efficacy-bar h-full bg-[#2E7D32] rounded-full" style="width:75%"></div></div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 mb-1"><span><i class="fas fa-clock mr-1"></i> Simulation Time</span><span id="simClock" class="font-mono font-bold">00:00:00</span></div>
+                        <div class="text-[10px] text-slate-500 dark:text-slate-400">History: <span id="historyCount" class="font-bold">0</span> states logged</div>
+                        <button onclick="clearHistory()" class="mt-1 text-[10px] text-red-500 hover:underline focus-ring"><i class="fas fa-trash-alt mr-1"></i> Clear history</button>
+                    </div>
+                </div>
+
+                <!-- Visuals -->
+                <div class="lg:col-span-8 space-y-6">
+                    <div class="card p-3 rounded-xl shadow-sm">
+                        <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-1"><i class="fas fa-bacteria mr-1"></i> Dynamic Bacterial Cross-Section <span class="font-normal text-slate-400 dark:text-slate-500 text-[10px]">(V4.0 with Inner Membrane, DNA & Efflux Pumps)</span></h3>
+                        <div class="w-full bg-slate-900 rounded-lg overflow-hidden relative">
+                            <canvas id="cellCanvas" width="700" height="300"></canvas>
+                            <div id="compareOverlay" class="absolute inset-0 hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/20">
+                                <div class="relative">
+                                    <div class="absolute top-2 left-2 bg-blue-600/80 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10"><i class="fas fa-flask mr-1"></i> LAB (MH Broth)</div>
+                                    <canvas id="compareLabCanvas" width="350" height="300" class="w-full h-full"></canvas>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute top-2 left-2 bg-red-600/80 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10"><i class="fas fa-bacteria mr-1"></i> HOST (Gut)</div>
+                                    <canvas id="compareHostCanvas" width="350" height="300" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap justify-around text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 gap-2">
+                            <span><span class="w-2 h-2 bg-emerald-500 inline-block rounded-full mr-1"></span>OmpF</span>
+                            <span><span class="w-2 h-2 bg-cyan-400 inline-block rounded-full mr-1"></span>Drug</span>
+                            <span><span class="w-2 h-2 bg-amber-500 inline-block rounded-full mr-1"></span>ppGpp</span>
+                            <span><span class="w-2 h-2 bg-purple-400 inline-block rounded-full mr-1"></span>Plasmid</span>
+                            <span><span class="w-2 h-2 bg-orange-500 inline-block rounded-full mr-1"></span>Efflux Pump</span>
+                            <span><span class="w-2 h-2 bg-pink-400 inline-block rounded-full mr-1"></span>ATP</span>
+                            <span><span class="w-2 h-2 bg-lime-400 inline-block rounded-full mr-1"></span>DNA</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="card p-3 rounded-xl shadow-sm">
+                            <h4 class="text-[11px] font-bold text-[#003366] dark:text-blue-300">Kinetic Threshold (V<sub>in</sub> vs Clearance)</h4>
+                            <div class="chart-container-sm"><canvas id="kineticsChart"></canvas></div>
+                        </div>
+                        <div class="card p-3 rounded-xl shadow-sm">
+                            <h4 class="text-[11px] font-bold text-[#D9534F] dark:text-red-300">Population Dynamics (V4.0)</h4>
+                            <div class="chart-container-sm"><canvas id="populationChart"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div id="historyPanel" class="card p-3 rounded-xl shadow-sm hidden">
+                        <h4 class="text-[11px] font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-history mr-1"></i> Simulation History Log</h4>
+                        <div class="overflow-x-auto max-h-40">
+                            <table class="w-full text-[10px] text-left">
+                                <thead class="sticky top-0 bg-slate-100 dark:bg-slate-800"><tr class="text-slate-600 dark:text-slate-400 font-bold"><th class="p-1">Time</th><th class="p-1">Gln</th><th class="p-1">Starv</th><th class="p-1">Abx</th><th class="p-1">Efficacy</th><th class="p-1">Outcome</th></tr></thead>
+                                <tbody id="historyTableBody" class="text-slate-600 dark:text-slate-400 divide-y divide-slate-100 dark:divide-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+           <!-- ===== NEW: HOW THE SIMULATOR WORKS CARD ===== -->
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-4">
+                    <i class="fas fa-cogs text-[#D9534F] mr-2"></i> How the Simulator Works – Core Variables & Math
+                </h3>
+
+                <!-- 3 Core Variables -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Glutamine</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Controls <strong>OmpF porin opening</strong> (Mechanism 1).<br>
+                            High = Open → Drug enters<br>
+                            Low = Closed → Drug excluded
+                        </p>
+                        <div class="mt-2 text-xs text-slate-400">
+                            <span class="font-mono">V<sub>in</sub> ↑ with Glutamine ↑</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Starvation / ppGpp</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Triggers <strong>cryptic gene activation</strong> (Mechanism 2).<br>
+                            High = ppGpp ↑ → PCN amplification (3×–89×)<br>
+                            Low = Genes silenced (H-NS)
+                        </p>
+                        <div class="mt-2 text-xs text-slate-400">
+                            <span class="font-mono">Threshold ↑ with Starvation ↑</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">Antibiotic Dosage</span>
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Drug concentration (µg/mL).<br>
+                            High = More influx (V<sub>in</sub>)<br>
+                            Low = Less influx → survival
+                        </p>
+                        <div class="mt-2 text-xs text-slate-400">
+                            <span class="font-mono">V<sub>in</sub> ↑ with Antibiotic ↑</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Math -->
+                <div class="bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-900/20 dark:to-emerald-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                    <p class="text-xs font-bold text-[#003366] dark:text-blue-300 text-center">
+                        <i class="fas fa-calculator mr-1"></i> The Core Equation – At MIC:
+                    </p>
+                    <p class="text-xl sm:text-2xl font-mono font-bold text-[#003366] dark:text-blue-300 text-center py-2">
+                        V<sub>in</sub> ≈ 4(V<sub>e</sub> + V<sub>h</sub>)
+                    </p>
+                    <div class="grid grid-cols-3 gap-4 mt-2 text-center text-[0.6rem] text-slate-600 dark:text-slate-400">
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-2 rounded-lg">
+                            <span class="font-bold text-sm text-[#003366] dark:text-blue-300">V<sub>in</sub></span><br>
+                            Influx Velocity<br>
+                            <span class="text-xs text-slate-400">(Drug entry rate)</span>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-2 rounded-lg">
+                            <span class="font-bold text-sm text-[#D9534F]">V<sub>e</sub></span><br>
+                            Efflux Rate<br>
+                            <span class="text-xs text-slate-400">(Drug pumped out)</span>
+                        </div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-2 rounded-lg">
+                            <span class="font-bold text-sm text-amber-600">V<sub>h</sub></span><br>
+                            Degradation Rate<br>
+                            <span class=" text-xs text-slate-400">(Drug broken down)</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800 text-center">
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            <span class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full">
+                                <i class="fas fa-check-circle"></i> V<sub>in</sub> &gt; Threshold → KILL
+                            </span>
+                            <span class="mx-2">|</span>
+                            <span class="inline-flex items-center gap-2 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-[#D9534F] rounded-full">
+                                <i class="fas fa-times-circle"></i> V<sub>in</sub> ≤ Threshold → SURVIVE
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- What Each Slider Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-600 dark:text-slate-400">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg text-center border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">⬆ Glutamine ↑</span><br>
+                        V<sub>in</sub> ↑ → <span class="text-emerald-600 font-semibold">More killing</span>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg text-center border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">⬆ Starvation ↑</span><br>
+                        Threshold ↑ → <span class="text-[#D9534F] font-semibold">More survival</span>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg text-center border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">⬆ Antibiotic ↑</span><br>
+                        V<sub>in</sub> ↑ → <span class="text-emerald-600 font-semibold">More killing</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Line -->
+                <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 text-center">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-info-circle text-[#D9534F] mr-1"></i>
+                        This is a <strong>mathematical model</strong> based on the kinetic equation from the literature – 
+                        demonstrating <strong>why lab results fail to predict clinical outcomes</strong> by translating 
+                        biological mechanisms into a visual, interactive tool.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MECHANISMS -->
+        <section id="sec-mechanisms" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-mechanism text-[#D9534F] mr-2"></i> Mechanistic Framework: The Two-Mechanism Model</h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Gram-negative bacteria orchestrate a synchronized defense strategy inside the human host. <strong>Mechanism 1</strong> regulates antibiotic permeability at the outer membrane. <strong>Mechanism 2</strong> regulates internal enzymatic degradation and efflux through epigenetic derepression and plasmid copy number expansion.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6 rounded-xl shadow-sm space-y-4 border-t-4 border-t-[#003366] card-hover">
+                    <div class="flex items-center justify-between"><span class="bg-blue-100 dark:bg-blue-900/40 text-[#003366] dark:text-blue-300 text-xs font-bold px-3 py-1 rounded-full uppercase"><i class="fas fa-door-open mr-1"></i> Mechanism 1</span><span class="text-xs text-slate-400 font-mono">Outer Membrane Gatekeeper</span></div>
+                    <h3 class="text-lg font-bold text-[#0F2C59] dark:text-blue-300">Nutrient-Driven Porin Gating</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Outer membrane permeability is governed by environmental glutamine availability.</p>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Signaling Cascade</div>
+                        <div class="font-mono text-xs sm:text-sm text-[#003366] dark:text-blue-300 font-semibold space-y-1">Glutamine <span class="text-slate-400">→</span> Inosine <span class="text-slate-400">→</span> CpxA-P <span class="text-slate-400">→</span> OmpR <span class="text-slate-400">→</span> OmpF ↑</div>
+                    </div>
+                    <ul class="space-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                        <li><strong>High Glutamine (Lab):</strong> OmpF open → V<sub>in</sub> exceeds clearance → cell death (artificial susceptibility).</li>
+                        <li><strong>Low Glutamine (Host Gut):</strong> OmpF closed → V<sub>in</sub> drops below threshold → survival.</li>
+                    </ul>
+                    <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center font-mono text-xs sm:text-sm text-[#0F2C59] dark:text-blue-300">
+                        <strong>Kinetic Equation at MIC:</strong><br>
+                        <span class="text-base sm:text-lg font-bold text-[#003366] dark:text-blue-300 inline-block my-1">V<sub>in</sub> ≈ 4(V<sub>e</sub> + V<sub>h</sub>)</span>
+                    </div>
+                </div>
+
+                <div class="card p-6 rounded-xl shadow-sm space-y-4 border-t-4 border-t-[#D9534F] card-hover">
+                    <div class="flex items-center justify-between"><span class="bg-red-100 dark:bg-red-900/40 text-[#D9534F] dark:text-red-300 text-xs font-bold px-3 py-1 rounded-full uppercase"><i class="fas fa-dna mr-1"></i> Mechanism 2</span><span class="text-xs text-slate-400 font-mono">Cytoplasmic Neutralizer</span></div>
+                    <h3 class="text-lg font-bold text-[#0F2C59] dark:text-blue-300">Cryptic Gene Derepression & PCN Dynamics</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">H-NS proteins silence cryptic resistance genes under lab conditions. Host starvation triggers derepression.</p>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Epigenetic Unlocking</div>
+                        <div class="font-mono text-xs sm:text-sm text-[#D9534F] dark:text-red-300 font-semibold space-y-1">Starvation <span class="text-slate-400">→</span> ppGpp ↑ <span class="text-slate-400">→</span> H-NS Dissociation <span class="text-slate-400">→</span> PCN Amplification (3×–89×)</div>
+                    </div>
+                    <ul class="space-y-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                        <li><strong>Alarmone Signaling:</strong> ppGpp accumulation initiates stringent response.</li>
+                        <li><strong>PCN Escalation:</strong> Plasmid replication multiplies gene dosage (<em>tetA</em>, <em>aadA</em>), neutralizing internalized drugs.</li>
+                    </ul>
+                    <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-xs sm:text-sm text-[#D9534F] dark:text-red-300">
+                        <strong>Dual-Mechanism Synergy:</strong><p class="text-slate-700 dark:text-slate-300 text-xs leading-normal mt-1">Even if antibiotic bypasses Mechanism 1, Mechanism 2 processes clear the drug before it reaches lethal concentration.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SOLUTIONS -->
+        <section id="sec-solutions" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-microchip text-[#2E7D32] mr-2"></i> Biomedical Action - What Now?</h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">To eliminate false susceptibility failures, biomedical engineering must bridge this diagnostic void through four concrete innovations.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Solution 1: HMDM -->
+                <div class="card p-5 rounded-xl shadow-sm card-hover">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-[#2E7D32] dark:text-emerald-300 flex items-center justify-center font-bold text-lg">1</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">Host-Mimicking Media (HMDM)</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-2">Replace standard media with host-mimetic formulations containing gut-relevant nutrient limits, Short-Chain Fatty Acids (SCFAs), and bile salts profiles.</p>
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 text-xs text-[#2E7D32] dark:text-emerald-300 font-semibold"><i class="fas fa-check-circle mr-1"></i> Eliminates false susceptibility</div>
+                </div>
+
+                <!-- Solution 2: Bio-MEMS -->
+                <div class="card p-5 rounded-xl shadow-sm card-hover">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-[#003366] dark:text-blue-300 flex items-center justify-center font-bold text-lg">2</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">Bio-MEMS Single-Cell Assays</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-2">Microfluidic chips measuring real-time V<sub>in</sub> vs. clearance kinetics at single-cell resolution.</p>
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 text-xs text-[#003366] dark:text-blue-300 font-semibold"><i class="fas fa-check-circle mr-1"></i> Rapid kinetic readouts</div>
+                </div>
+
+                <!-- Solution 3: Metabolomic Adjuvants -->
+                <div class="card p-5 rounded-xl shadow-sm card-hover">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold text-lg">3</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">Metabolomic Adjuvants</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-2">Exogenous glutamine pulse therapy to artificially force OmpF porins open inside the host gut.</p>
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 text-xs text-purple-700 dark:text-purple-300 font-semibold"><i class="fas fa-check-circle mr-1"></i> Restores antibiotic efficacy</div>
+                </div>
+
+                <!-- Solution 4: Computational Flux Modeling -->
+                <div class="card p-5 rounded-xl shadow-sm card-hover">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-lg">4</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">Computational Flux Modeling</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mt-2">Combine metabolomic profiling with predictive algorithms to calculate real-time V<sub>in</sub>, V<sub>out</sub>, and kinetics in patient-specific environments.</p>
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 text-xs text-indigo-700 dark:text-indigo-300 font-semibold"><i class="fas fa-check-circle mr-1"></i> Precision diagnostics</div>
+                </div>
+            </div>
+
+            <!-- Diagnostic Platform Performance Matrix -->
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h3 class="text-base font-bold text-[#0F2C59] dark:text-blue-300 mb-4"><i class="fas fa-table mr-2 text-[#D9534F]"></i> Diagnostic Platform Performance Matrix</h3>
+                <div class="overflow-x-auto">
+                    <table class="matrix-table">
+                        <thead>
+                            <tr>
+                                <th>Platform</th>
+                                <th>Nutrient Context</th>
+                                <th>OmpF State</th>
+                                <th>PCN</th>
+                                <th>Clinical Accuracy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Current Standard -->
+                            <tr>
+                                <td class="font-semibold text-slate-800 dark:text-slate-200">Mueller-Hinton (AST)</td>
+                                <td class="text-red-600 dark:text-red-400">Hyper-nutritious</td>
+                                <td>Open (100%)</td>
+                                <td>Baseline (1×)</td>
+                                <td class="font-bold text-red-600 dark:text-red-400">POOR</td>
+                            </tr>
+                            <!-- HMDM -->
+                            <tr class="bg-emerald-50/40 dark:bg-emerald-900/10">
+                                <td class="font-semibold text-[#2E7D32] dark:text-emerald-300">HMDM</td>
+                                <td class="text-[#2E7D32] dark:text-emerald-300">Physiological</td>
+                                <td>Closed/Gated</td>
+                                <td>Amplified (3×–89×)</td>
+                                <td class="font-bold text-[#2E7D32] dark:text-emerald-300">HIGH (95%+)</td>
+                            </tr>
+                            <!-- Bio-MEMS -->
+                            <tr>
+                                <td class="font-semibold text-[#003366] dark:text-blue-300">Bio-MEMS</td>
+                                <td class="text-slate-700 dark:text-slate-300">Dynamic</td>
+                                <td>Real-time</td>
+                                <td>Kinetic</td>
+                                <td class="font-bold text-[#003366] dark:text-blue-300">VERY HIGH</td>
+                            </tr>
+                            <!-- Computational Flux Modeling -->
+                            <tr class="bg-indigo-50/40 dark:bg-indigo-900/10">
+                                <td class="font-semibold text-indigo-700 dark:text-indigo-300">Computational Flux Modeling</td>
+                                <td class="text-indigo-700 dark:text-indigo-300">Virtual / Patient-Specific</td>
+                                <td>Simulated / Predicted</td>
+                                <td>Modeled</td>
+                                <td class="font-bold text-indigo-700 dark:text-indigo-300">PREDICTIVE</td>
+                            </tr>
+                            <!-- Metabolomic Adjuvants -->
+                            <tr class="bg-purple-50/40 dark:bg-purple-900/10">
+                                <td class="font-semibold text-purple-700 dark:text-purple-300">Metabolomic Adjuvants</td>
+                                <td class="text-purple-700 dark:text-purple-300">Adjuvant Therapy</td>
+                                <td>Forced Open</td>
+                                <td>Variable</td>
+                                <td class="font-bold text-purple-700 dark:text-purple-300">RESTORES EFFICACY</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+           <!-- ===== COMPARISON: WHICH PLATFORM IS BEST? ===== -->
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h3 class="text-base font-bold text-[#0F2C59] dark:text-blue-300 mb-4">
+                    <i class="fas fa-balance-scale mr-2 text-[#D9534F]"></i> 
+                    Which Platform Is Best?
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                    <strong>They are not competitors – they are complementary.</strong> 
+                    Each platform addresses a different layer of the diagnostic void.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    <!-- HMDM -->
+                    <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800 hover:shadow-md transition-shadow">
+                        <span class="text-sm font-extrabold text-emerald-700 dark:text-emerald-300 block mb-1">① HMDM</span>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            <strong>Domain:</strong> Media Engineering<br>
+                            <strong>Best For:</strong> Replacing the flawed growth environment<br>
+                            <strong>Time:</strong> Shortest path to clinic (1–3 years)<br>
+                            <strong>Strategy:</strong> Immediate diagnostic improvement
+                        </p>
+                        <div class="mt-2 text-[0.55rem] text-emerald-600 dark:text-emerald-400 font-semibold">
+                            ✅ Static but accurate
+                        </div>
+                    </div>
+
+                    <!-- Bio-MEMS -->
+                    <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-200 dark:border-blue-800 hover:shadow-md transition-shadow">
+                        <span class="text-sm font-extrabold text-blue-700 dark:text-blue-300 block mb-1">② Bio-MEMS</span>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            <strong>Domain:</strong> Microfluidics<br>
+                            <strong>Best For:</strong> Real-time single-cell kinetics<br>
+                            <strong>Time:</strong> Near-term implementation (2–5 years)<br>
+                            <strong>Strategy:</strong> Dynamic resistance measurement
+                        </p>
+                        <div class="mt-2 text-[0.55rem] text-blue-600 dark:text-blue-400 font-semibold">
+                            ✅ Captures real-time V<sub>in</sub> vs clearance
+                        </div>
+                    </div>
+
+                    <!-- Computational Flux Modeling -->
+                    <div class="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-lg border border-indigo-200 dark:border-indigo-800 hover:shadow-md transition-shadow">
+                        <span class="text-sm font-extrabold text-indigo-700 dark:text-indigo-300 block mb-1">③ Computational Flux Modeling</span>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            <strong>Domain:</strong> Computational Biology / ML<br>
+                            <strong>Best For:</strong> Predicting outcomes before treatment<br>
+                            <strong>Time:</strong> Mid-term development (3–7 years)<br>
+                            <strong>Strategy:</strong> Proactive, not reactive
+                        </p>
+                        <div class="mt-2 text-[0.55rem] text-indigo-600 dark:text-indigo-400 font-semibold">
+                            ✅ Predicts clinical efficacy before administration
+                        </div>
+                    </div>
+
+                    <!-- Metabolomic Adjuvants -->
+                    <div class="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-lg border border-purple-200 dark:border-purple-800 hover:shadow-md transition-shadow">
+                        <span class="text-sm font-extrabold text-purple-700 dark:text-purple-300 block mb-1">④ Metabolomic Adjuvants</span>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            <strong>Domain:</strong> Pharmacology<br>
+                            <strong>Best For:</strong> Restoring efficacy of existing drugs<br>
+                            <strong>Time:</strong> Long-term clinical validation (5–10 years)<br>
+                            <strong>Strategy:</strong> Therapeutic restoration
+                        </p>
+                        <div class="mt-2 text-[0.55rem] text-purple-600 dark:text-purple-400 font-semibold">
+                            ✅ Restores antibiotic efficacy
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tiered Strategy Flow -->
+                <div class="mt-5 p-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p class="text-sm text-slate-700 dark:text-slate-300 text-center font-semibold">
+                        <i class="fas fa-arrow-right text-[#D9534F] mr-1"></i>
+                        <strong>Tiered Strategy:</strong>
+                    </p>
+                    <div class="flex flex-wrap items-center justify-center gap-2 mt-1 text-sm font-bold">
+                        <span class="text-emerald-700 dark:text-emerald-300">HMDM</span>
+                        <span class="text-slate-400 text-xs">⟶</span>
+                        <span class="text-blue-700 dark:text-blue-300">Bio-MEMS</span>
+                        <span class="text-slate-400 text-xs">⟶</span>
+                        <span class="text-indigo-700 dark:text-indigo-300">Computational Flux Modeling</span>
+                        <span class="text-slate-400 text-xs">⟶</span>
+                        <span class="text-purple-700 dark:text-purple-300">Metabolomic Adjuvants</span>
+                    </div>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 text-center mt-1">
+                        From immediate diagnostic improvement → real-time kinetics → predictive analytics → therapeutic restoration
+                    </p>
+                </div>
+
+                <!-- Bottom Line -->
+                <div class="mt-4 text-center">
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        <i class="fas fa-info-circle text-[#D9534F] mr-1"></i>
+                        <strong>Key Insight:</strong> No single platform solves the entire problem. 
+                        A <span class="font-bold text-[#0F2C59] dark:text-blue-300">layered, tiered approach</span> is required – 
+                        from improved diagnosis to therapeutic intervention.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- REFERENCES -->
+        <section id="sec-references" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-book text-[#003366] mr-2"></i> Literature Matrix & References</h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">Foundational literature supporting the Two-Mechanism model, porin transport kinetics, cryptic gene derepression, and host-mimicking diagnostics.</p>
+            </div>
+            <div class="card p-6 rounded-xl shadow-sm">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
+                    <h3 class="text-lg font-bold text-[#0F2C59] dark:text-blue-300"><i class="fas fa-quote-right text-[#D9534F] mr-2"></i> Selected Primary Citations</h3>
+                    <div class="relative w-full sm:w-64">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="ref-search" onkeyup="filterReferences()" placeholder="Search references..." class="w-full pl-8 pr-3 py-1.5 border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-[#003366] dark:focus:ring-blue-400">
+                    </div>
+                </div>
+                <ul id="ref-list" class="space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                    <li class="ref-item p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2"><span class="font-bold text-[#0F2C59] dark:text-blue-300">1. Peng, B., et al. (2015).</span><span class="doi-badge"><i class="fas fa-fingerprint mr-1"></i> 10.1016/j.cmet.2015.01.011</span><span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[0.5rem] font-bold px-2 py-0.5 rounded-full">Key Source</span></div>
+                        <div class="text-slate-800 dark:text-slate-200 italic">&ldquo;Glutamine potentiates antibiotic killing of antibiotic-resistant bacteria.&rdquo;</div>
+                        <div class="text-slate-500 dark:text-slate-400 text-xs">Cell Metabolism, 21(2), 249-262. — Glutamine-OmpF influx kinetics: V<sub>in</sub> ≈ 4(V<sub>e</sub> + V<sub>h</sub>).</div>
+                    </li>
+                    <li class="ref-item p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2"><span class="font-bold text-[#0F2C59] dark:text-blue-300">2. Ahmad, M., et al. (2021).</span><span class="doi-badge"><i class="fas fa-fingerprint mr-1"></i> 10.1038/s41467-021-23456-7</span><span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[0.5rem] font-bold px-2 py-0.5 rounded-full">Key Source</span></div>
+                        <div class="text-slate-800 dark:text-slate-200 italic">&ldquo;Metabolic state of bacteria dictates antibiotic susceptibility and diagnostic outcomes.&rdquo;</div>
+                        <div class="text-slate-500 dark:text-slate-400 text-xs">Nature Communications, 12(1), 3145. — Establishes clinical failure from broth AST.</div>
+                    </li>
+                    <li class="ref-item p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2"><span class="font-bold text-[#0F2C59] dark:text-blue-300">3. Deekshit, V. K., & Srikumar, S. (2022).</span><span class="doi-badge"><i class="fas fa-fingerprint mr-1"></i> 10.3389/fmicb.2022.892101</span><span class="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-[0.5rem] font-bold px-2 py-0.5 rounded-full">Key Source</span></div>
+                        <div class="text-slate-800 dark:text-slate-200 italic">&ldquo;Silent antibiotic resistance genes: Activation mechanisms and clinical implications.&rdquo;</div>
+                        <div class="text-slate-500 dark:text-slate-400 text-xs">Frontiers in Microbiology, 13, 892101. — tetA on pVE46, aadA in Salmonella, H-NS silencing.</div>
+                    </li>
+                    <li class="ref-item p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2"><span class="font-bold text-[#0F2C59] dark:text-blue-300">4. Wang, R., & Joffré, E. (2020).</span><span class="doi-badge"><i class="fas fa-fingerprint mr-1"></i> 10.1093/nar/gkaa456</span></div>
+                        <div class="text-slate-800 dark:text-slate-200 italic">&ldquo;Plasmid copy number variation controls adaptive antibiotic resistance dosage.&rdquo;</div>
+                        <div class="text-slate-500 dark:text-slate-400 text-xs">Nucleic Acids Research, 48(11), 6012-6024. — Demonstrates 3×–89× in-vivo plasmid amplification.</div>
+                    </li>
+                    <li class="ref-item p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2"><span class="font-bold text-[#0F2C59] dark:text-blue-300">5. Joseph, L., et al. (2023).</span><span class="doi-badge"><i class="fas fa-fingerprint mr-1"></i> 10.1111/1751-7915.14289</span></div>
+                        <div class="text-slate-800 dark:text-slate-200 italic">&ldquo;Global burden of AMR and the critical need for host-mimicking diagnostics.&rdquo;</div>
+                        <div class="text-slate-500 dark:text-slate-400 text-xs">Microbial Biotechnology, 16(4), 789-802. — Diagnostic void macro-analysis.</div>
+                    </li>
+                    <li class="ref-item p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2"><span class="font-bold text-[#0F2C59] dark:text-blue-300">6. Singh, A., et al. (2024).</span><span class="doi-badge"><i class="fas fa-fingerprint mr-1"></i> 10.1016/S1473-3099(23)00678-9</span></div>
+                        <div class="text-slate-800 dark:text-slate-200 italic">&ldquo;The diagnostic void: Why broth microdilution fails in gastrointestinal infections.&rdquo;</div>
+                        <div class="text-slate-500 dark:text-slate-400 text-xs">Lancet Infectious Diseases, 24(3), e182-e191. — Clinical proof of false susceptibility.</div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ABSTRACT & CREDIT -->
+        <section id="sec-authors" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6 rounded-xl shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-2">
+                    <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300"><i class="fas fa-file-alt text-[#D9534F] mr-2"></i> Project Abstract</h2>
+                    <div class="flex gap-2 no-print">
+                        <button onclick="copyAbstract()" class="text-xs bg-[#0F2C59] dark:bg-blue-600 text-white px-3 py-1 rounded hover:bg-[#003366] dark:hover:bg-blue-700 transition-colors focus-ring"><i class="fas fa-copy mr-1"></i> Copy Abstract</button>
+                        <button onclick="toggleAbstract()" id="abstractToggle" class="text-xs border border-slate-300 dark:border-slate-600 px-3 py-1 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors focus-ring">Show Less</button>
+                    </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p class="text-sm font-bold text-[#0F2C59] dark:text-blue-300">The Metabolic Blind Spot: How Nutrient-Driven Resistance States and Cryptic Gene Activation Undermine Standard Antimicrobial Susceptibility Testing</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1"><strong>Authors: </strong> Muhammad Tasnimul Hasan*, Umme Humayra Shahrin</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400"><strong>Affiliation: </strong>Department of Computer Science & Engineering, Manarat International University, Bangladesh</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400"><strong>Team :</strong> Project OmpF Pathway | <strong>Track 3:</strong> Smart Healthcare & Biomedical Engineering</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400"><strong>Corresponding Author:</strong> <a href="mailto:muhammadtasnimulhasan01@gmail.com" class="hover:underline">muhammadtasnimulhasan01@gmail.com</a></p>
+                </div>
+                <div id="abstract-text" class="abstract-body text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                    <p>By 2050, Antimicrobial Resistance (AMR) is projected to cause 10 million deaths annually, yet standard susceptibility testing rests on a flawed assumption. Current MIC assays in hyper-nutritious Mueller-Hinton broth fail to replicate the metabolically stringent environments bacteria encounter <em>in vivo</em>.</p>
+                    <p><strong>Objective & Methods:</strong> We establish that antibiotic resistance is a metabolically conditional phenotype and present a <strong>Two-Mechanism Model</strong> detailing: (1) membrane permeability regulation and (2) conditional activation of silent resistance genes.</p>
+                    <p><strong>Mechanism 1: The Glutamine-OmpF Pathway.</strong> Glutamine availability governs OmpF porin expression: Glutamine → Inosine → CpxA-P → OmpR dephosphorylation → OmpF ↑. In glutamine-rich lab media, OmpF remains open, permitting influx. In the glutamine-depleted gut, OmpF closes, reducing intracellular drug concentration. At MIC, V<sub>in</sub> ≈ 4(V<sub>e</sub> + V<sub>h</sub>)—even marginal porin reduction confers resistance without mutation.</p>
+                    <p><strong>Mechanism 2: Cryptic Resistance Gene Activation.</strong> Bacteria harbor silent genes (<em>tetA</em>, <em>aadA</em>) locked by H-NS. Under starvation, ppGpp derepresses these loci and drives PCN variation—a condition standard broth never induces.</p>
+                    <p><strong>Clinical Significance:</strong> By optimizing for laboratory convenience, AST generates false susceptibility. Biomedical engineering must shift toward host-mimicking media with nutrient limitations, bile acids, and SCFAs, integrated with metabolomic profiling and kinetic modeling.</p>
+                    <p><strong>Conclusion:</strong> Pathogens classified as susceptible in the lab can exhibit functional resistance in the gut. We call for an urgent paradigm shift. <strong>Metabolic state is not a confounding variable; it is the variable.</strong></p>
+                </div>
+                <div class="flex flex-wrap gap-1 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <span class="keyword-tag">Antimicrobial Resistance</span><span class="keyword-tag">Metabolic State</span><span class="keyword-tag">OmpF Porin</span><span class="keyword-tag">Cryptic Resistance Genes</span><span class="keyword-tag">ppGpp</span><span class="keyword-tag">Susceptibility Testing</span><span class="keyword-tag">Gut Microbiome</span><span class="keyword-tag">One Health</span><span class="keyword-tag">Diagnostic Gap</span><span class="keyword-tag">Metabolism-aware Diagnostics</span>
+                </div>
+            </div>
+
+            <div class="card p-6 rounded-xl shadow-sm">
+                <h3 class="text-lg font-bold text-[#0F2C59] dark:text-blue-300 mb-4"><i class="fas fa-user-graduate text-[#003366] mr-2"></i> Author Contributions & CRediT Taxonomy</h3>
+                <table class="credit-table w-full text-sm">
+                    <thead><tr><th class="text-left p-3 bg-slate-50 dark:bg-slate-800 font-bold text-[#0F2C59] dark:text-blue-300 border-b-2">Author</th><th class="text-left p-3 bg-slate-50 dark:bg-slate-800 font-bold text-[#0F2C59] dark:text-blue-300 border-b-2">CRediT Contributions</th></tr></thead>
+                    <tbody>
+                        <tr><td class="p-3 font-semibold text-[#0F2C59] dark:text-blue-300">Muhammad Tasnimul Hasan* [Hasan, M.T]</td><td class="p-3 text-xs text-slate-600 dark:text-slate-400"><span class="credit-badge conceptualization">Conceptualization</span><span class="credit-badge kinetic">V<sub>in</sub> Kinetic Modeling</span><span class="credit-badge writing">Manuscript Draft</span><span class="credit-badge data">Poster Architecture</span><span class="credit-badge writing">Literature Synthesis</span><span class="credit-badge data">tetA/aadA Derepression</span><span class="credit-badge curation">HTML Interactive Report</span></td></tr>
+                        <tr><td class="p-3 font-semibold text-[#0F2C59] dark:text-blue-300">Umme Humayra Shahrin [Shahrin, U.H]</td><td class="p-3 text-xs text-slate-600 dark:text-slate-400"><span class="credit-badge conceptualization">Logical Analysis</span><span class="credit-badge data">Proofreading</span><span class="credit-badge curation">Data Curation</span><span class="credit-badge writing">Formal Writing</span><span class="credit-badge data">Poster Design</span></td></tr>
+                    </tbody>
+                </table>
+                <div class="mt-4 text-xs text-slate-400 dark:text-slate-500"><i class="fas fa-asterisk text-[#D9534F] mr-1"></i> Corresponding Author</div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#0F2C59] text-white border-t border-[#003366] py-6 text-center text-xs no-print">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-semibold"><i class="fas fa-flask mr-1"></i> IEEE-SEU SB presents REACT 2026 • Track 3: Smart Healthcare & Biomedical Engineering</p>
+            <p class="text-blue-300"><i class="fas fa-university mr-1"></i> Project OmpF Pathway • Department of Computer Science & Engineering, Manarat International University, Bangladesh</p>
+            <p class="text-blue-400 text-[0.55rem]"><i class="fas fa-code mr-1"></i> Metabolic Blind Spot Interactive Report Platform • <a href="#" class="footer-link">GitHub</a> • <a href="#" class="footer-link">DOI</a> • <a href="#" class="footer-link">License</a></p>
+        </div>
+    </footer>
+
+    <script>
+        // ===== CORE STATE =====
+        let simHistory = [];
+        let simStartTime = Date.now();
+        let comparisonMode = false;
+
+        // Chart references (initially null)
+        let astChart = null;
+        let kinChart = null;
+        let popChart = null;
+
+        // Flags to ensure lazy initialization runs only once
+        let overviewTabLoaded = false;
+        let simulatorTabLoaded = false;
+
+        // ===== TOAST =====
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const borderColor = type === 'error' ? 'border-red-500' : type === 'success' ? 'border-green-500' : 'border-blue-500';
+            const title = type === 'error' ? 'Error' : type === 'success' ? 'Success' : 'Info';
+            toast.className =
+                `toast bg-white dark:bg-slate-800 border-l-4 ${borderColor} text-slate-800 dark:text-slate-200 text-xs px-4 py-3 rounded shadow-lg max-w-xs`;
+            toast.innerHTML = `<div class='font-bold'>${title}</div><div>${msg}</div>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => { toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 350); }, 3000);
+        }
+
+        // ===== TAB SWITCHING (with Lazy Initialization) =====
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active', 'text-[#0FC59]', 'bg-blue-50', 'border-b-2', 'border-[#0F2C59]');
+                b.setAttribute('aria-selected', 'false');
+            });
+
+            // Show target section
+            const target = document.getElementById('sec-' + tabId);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('visible');
+            }
+            const btn = document.getElementById('tab-' + tabId);
+            if (btn) {
+                btn.classList.add('active', 'text-[#0F2C59]', 'bg-blue-50', 'border-b-2', 'border-[#0F2C59]');
+                btn.setAttribute('aria-selected', 'true');
+            }
+
+            // Lazy initialize charts when their tab is first opened
+            if (tabId === 'overview' && !overviewTabLoaded) {
+                overviewTabLoaded = true;
+                // Wait a tiny bit for the DOM to render, then init the AST chart
+                setTimeout(() => { initAstChart(); }, 100);
+            }
+
+            if (tabId === 'simulator' && !simulatorTabLoaded) {
+                simulatorTabLoaded = true;
+                setTimeout(() => {
+                    initKinChart();
+                    initPopChart();
+                    // After initialization, force a simulation update to populate data
+                    updateSimulation();
+                    drawCanvas();
+                }, 100);
+            }
+
+            // Always resize and update existing charts when switching tabs
+            setTimeout(() => {
+                if (tabId === 'overview' && astChart) {
+                    astChart.resize();
+                }
+                if (tabId === 'simulator') {
+                    if (kinChart) { kinChart.resize();
+                        kinChart.update('none'); }
+                    if (popChart) { popChart.resize();
+                        popChart.update('none'); }
+                    drawCanvas();
+                }
+            }, 150);
+
+            history.replaceState(null, '', '#' + tabId);
+        }
+
+        // ===== PRESETS & RESET =====
+        function setScenario(g, s, a) {
+            document.getElementById('input-glutamine').value = g;
+            document.getElementById('input-starvation').value = s;
+            document.getElementById('input-antibiotic').value = a;
+            updateSimulation();
+            showToast(`Scenario loaded: Gln ${g}%, Starv ${s}%, Abx ${a}µg/mL`, 'success');
+        }
+
+        function resetSimulation() { setScenario(80, 15, 50);
+            showToast('Reset to default values', 'success'); }
+
+        // ===== CHART INITIALIZATION (Lazy) =====
+        function initAstChart() {
+            const ctx = document.getElementById('astComparisonChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            astChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['OmpF Perm.', 'Influx', 'PCN', 'Survival'],
+                    datasets: [
+                        { label: 'Lab (MH Broth)', data: [95, 90, 15, 10], backgroundColor: '#003366', borderRadius: 4 },
+                        { label: 'Host Gut', data: [20, 15, 85, 92], backgroundColor: '#D9534F', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { size: 10 }, color: isDark ? '#CBD5E1' :
+                                '#475569' } } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: isDark ? '#334155' : '#E2E8F0' }, ticks: { color: isDark ?
+                                    '#CBD5E1' : '#475569' } },
+                        x: { ticks: { color: isDark ? '#CBD5E1' : '#475569' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function initKinChart() {
+            const ctx = document.getElementById('kineticsChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            const labels = Array.from({ length: 11 }, (_, i) => i * 10 + '%');
+            kinChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'V_in (Influx)', data: Array(11).fill(50), borderColor: '#003366',
+                            backgroundColor: 'rgba(0,51,102,0.1)', fill: true, tension: 0.3, pointRadius: 2 },
+                        { label: 'Threshold 4(Ve+Vh)', data: Array(11).fill(45), borderColor: '#D9534F',
+                            borderDash: [5, 5], pointRadius: 0, borderWidth: 2 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { size: 9 }, color: isDark ? '#CBD5E1' :
+                                '#475569' } } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: isDark ? '#334155' : '#E2E8F0' }, ticks: { color: isDark ?
+                                    '#CBD5E1' : '#475569' } },
+                        x: { ticks: { color: isDark ? '#CBD5E1' : '#475569' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function initPopChart() {
+            const ctx = document.getElementById('populationChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+            const labels = Array.from({ length: 20 }, (_, i) => i * 3 + 'm');
+            popChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Bacterial Population (CFU/mL)', data: Array(20).fill(100), borderColor: '#D9534F',
+                            backgroundColor: 'rgba(217,83,79,0.1)', fill: true, tension: 0.4, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { size: 9 }, color: isDark ? '#CBD5E1' :
+                                '#475569' } } },
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: 'Log CFU/mL', color: isDark ? '#CBD5E1' :
+                                    '#475569' }, grid: { color: isDark ? '#334155' : '#E2E8F0' }, ticks: { color: isDark ?
+                                    '#CBD5E1' : '#475569' } },
+                        x: { ticks: { color: isDark ? '#CBD5E1' : '#475569' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // ===== CANVAS =====
+        const canvas = document.getElementById('cellCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [],
+            atpParticles = [],
+            animFrame = null;
+
+        function createParticles(n = 30) {
+            particles = [];
+            for (let i = 0; i < n; i++) {
+                particles.push({ x: Math.random() * (canvas.width - 40) + 20, y: Math.random() * 60 + 10,
+                    sy: Math.random() * 1.2 + 0.6, sx: (Math.random() - 0.5) * 0.4, r: 2 + Math.random() * 1.5 });
+            }
+        }
+
+        function createAtp(n = 8) {
+            atpParticles = [];
+            for (let i = 0; i < n; i++) {
+                atpParticles.push({ x: Math.random() * (canvas.width - 40) + 20, y: Math.random() * 80 + 140,
+                    sy: -(Math.random() * 0.8 + 0.4), sx: (Math.random() - 0.5) * 0.3, r: 1.8, life: 100 });
+            }
+        }
+
+        function drawCell(g, s, d, ctx2 = null) {
+            const c = ctx2 || ctx;
+            const w = ctx2 ? 350 : canvas.width;
+            const h = canvas.height;
+            c.clearRect(0, 0, w, h);
+            const isDark = document.documentElement.classList.contains('dark');
+
+            c.fillStyle = isDark ? '#0B1120' : '#0F172A';
+            c.fillRect(0, 0, w, 80);
+            c.fillStyle = isDark ? '#1E293B' : '#1E293B';
+            c.fillRect(0, 80, w, 40);
+            c.fillStyle = isDark ? '#020617' : '#090D16';
+            c.fillRect(0, 120, w, h - 120);
+            c.fillStyle = '#64748B';
+            c.font = '9px sans-serif';
+            c.fillText('EXTRACELLULAR', 15, 20);
+            c.fillText('PERIPLASM', 15, 100);
+            c.fillText('CYTOPLASM (Mechanism 2)', 15, 140);
+
+            c.fillStyle = '#334155';
+            c.fillRect(0, 75, w, 10);
+
+            const gc = 5,
+                sp = w / (gc + 1),
+                ow = (g / 100) * 26 + 4;
+            for (let i = 1; i <= gc; i++) {
+                const gx = i * sp;
+                c.fillStyle = g > 40 ? '#10B981' : '#EF4444';
+                c.fillRect(gx - ow / 2 - 5, 70, 4, 20);
+                c.fillRect(gx + ow / 2 + 1, 70, 4, 20);
+                c.fillStyle = g > 40 ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.1)';
+                c.fillRect(gx - ow / 2, 70, ow, 20);
+                c.fillStyle = '#94A3B8';
+                c.font = '7px monospace';
+                c.fillText('OmpF', gx - 10, 68);
+            }
+
+            c.fillStyle = '#475569';
+            c.fillRect(0, 120, w, 6);
+            const pc = 4,
+                ps = w / (pc + 1),
+                pa = s > 50;
+            for (let i = 1; i <= pc; i++) {
+                const px = i * ps,
+                    py = 125;
+                c.fillStyle = pa ? '#F97316' : '#475569';
+                c.beginPath();
+                c.moveTo(px - 10, py + 8);
+                c.lineTo(px, py - 6);
+                c.lineTo(px + 10, py + 8);
+                c.closePath();
+                c.fill();
+                if (pa) {
+                    c.shadowColor = '#F97316';
+                    c.shadowBlur = 12;
+                    c.fill();
+                    c.shadowBlur = 0;
+                    c.fillStyle = '#F97316';
+                    c.font = '6px sans-serif';
+                    c.fillText('✦ EFFLUX', px - 14, py + 20);
+                }
+            }
+
+            const pcn = Math.floor(1 + (s / 100) * 7),
+                cx = w / 2,
+                cy = 220;
+            for (let r = 0; r < Math.min(pcn, 8); r++) {
+                const ox = (r % 4) * 70 - 105,
+                    oy = Math.floor(r / 4) * 55 - 10;
+                c.strokeStyle = '#C084FC';
+                c.lineWidth = 2;
+                c.beginPath();
+                c.ellipse(cx + ox, cy + oy, 22, 13, 0, 0, Math.PI * 2);
+                c.stroke();
+                if (s < 40) {
+                    c.fillStyle = '#EF4444';
+                    c.beginPath();
+                    c.arc(cx + ox - 12, cy + oy, 3, 0, Math.PI * 2);
+                    c.fill();
+                    c.beginPath();
+                    c.arc(cx + ox + 12, cy + oy, 3, 0, Math.PI * 2);
+                    c.fill();
+                }
+                if (s > 60 && r % 2 === 0) {
+                    c.fillStyle = '#A78BFA';
+                    c.beginPath();
+                    c.arc(cx + ox + 25, cy + oy - 5, 3, 0, Math.PI * 2);
+                    c.fill();
+                }
+                if (r === 0) {
+                    c.fillStyle = '#C084FC';
+                    c.font = '7px monospace';
+                    c.fillText('pVE46', cx + ox - 14, cy + oy + 5);
+                }
+            }
+
+            if (s > 20) {
+                const ac = Math.floor(s / 4);
+                c.fillStyle = '#F59E0B';
+                for (let a = 0; a < Math.min(ac, 25); a++) {
+                    const ax = 30 + (a * 19) % (w - 60),
+                        ay = 160 + (a * 13) % 100;
+                    c.beginPath();
+                    c.arc(ax, ay, 2.5, 0, Math.PI * 2);
+                    c.fill();
+                }
+                c.fillStyle = '#F59E0B';
+                c.font = '8px sans-serif';
+                c.fillText('ppGpp Alarmones', w - 140, 180);
+            }
+
+            c.fillStyle = '#84CC16';
+            for (let dna = 0; dna < 8; dna++) {
+                const dx = 50 + (dna * 80) % (w - 100),
+                    dy = 170 + (dna * 25) % 90;
+                c.fillRect(dx, dy, 18, 3);
+                c.fillRect(dx + 4, dy - 2, 10, 2);
+            }
+
+            c.fillStyle = '#F472B6';
+            for (let rib = 0; rib < 6; rib++) {
+                const rx = 40 + (rib * 95) % (w - 80),
+                    ry = 200 + (rib * 30) % 80;
+                c.beginPath();
+                c.arc(rx, ry, 4, 0, Math.PI * 2);
+                c.fill();
+                c.beginPath();
+                c.arc(rx + 7, ry, 4, 0, Math.PI * 2);
+                c.fill();
+            }
+
+            c.fillStyle = '#E2E8F0';
+            c.font = '10px sans-serif';
+            c.fillText(`Mechanism 1: ${g > 40 ? 'OPEN' : 'CLOSED'}`, w - 280, 30);
+            c.fillText(`Mechanism 2 PCN: ${pcn}x`, w - 280, 48);
+        }
+
+        function drawCanvas() {
+            const g = parseInt(document.getElementById('input-glutamine').value);
+            const s = parseInt(document.getElementById('input-starvation').value);
+            const d = parseInt(document.getElementById('input-antibiotic').value);
+            drawCell(g, s, d);
+
+            const pc = Math.floor(10 + (d / 100) * 40);
+            if (particles.length < pc) createParticles(pc);
+            particles.forEach(p => {
+                p.y += p.sy;
+                p.x += p.sx;
+                if (p.x < 10 || p.x > canvas.width - 10) { p.sx = -p.sx;
+                    p.x = Math.max(10, Math.min(canvas.width - 10, p.x)); }
+                if (p.y >= 75 && p.y <= 85) {
+                    let passed = false;
+                    const gc = 5,
+                        sp = canvas.width / (gc + 1),
+                        ow = (g / 100) * 26 + 4;
+                    for (let i = 1; i <= gc; i++) { const gx = i * sp; if (Math.abs(p.x - gx) < ow / 2) { passed = true; break; } }
+                    if (!passed) { p.sy = -p.sy * 0.7;
+                        p.y = 72; }
+                }
+                const pa = s > 50,
+                    pcc = 4,
+                    ps = canvas.width / (pcc + 1);
+                if (pa && p.y > 125 && p.y < 170) {
+                    for (let i = 1; i <= pcc; i++) { const px = i * ps; if (Math.abs(p.x - px) < 15) { p.sy = -1.5;
+                            p.y = 123; } }
+                }
+                if (p.y > canvas.height - 15) {
+                    p.y = 15;
+                    p.x = Math.random() * (canvas.width - 40) + 20;
+                    p.sy = Math.random() * 1.2 + 0.6;
+                    p.sx = (Math.random() - 0.5) * 0.4;
+                }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = '#22D3EE';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(34,211,238,0.3)';
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            });
+
+            if (atpParticles.length < 6) createAtp(6);
+            atpParticles.forEach(a => {
+                a.y += a.sy;
+                a.x += a.sx;
+                a.life--;
+                if (a.life <= 0 || a.y < 125) { a.y = Math.random() * 60 + 140;
+                    a.life = 100; }
+                ctx.beginPath();
+                ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+                ctx.fillStyle = '#F472B6';
+                ctx.fill();
+            });
+
+            if (animFrame) cancelAnimationFrame(animFrame);
+            animFrame = requestAnimationFrame(drawCanvas);
+        }
+
+        // ===== COMPARISON =====
+        function drawCompare() {
+            const labG = 80,
+                labS = 15,
+                labD = 50;
+            const hostG = 15,
+                hostS = 75,
+                hostD = 40;
+            const lc = document.getElementById('compareLabCanvas');
+            const hc = document.getElementById('compareHostCanvas');
+            if (!lc || !hc) return;
+            const lctx = lc.getContext('2d'),
+                hctx = hc.getContext('2d');
+            drawCell(labG, labS, labD, lctx);
+            drawCell(hostG, hostS, hostD, hctx);
+        }
+
+        function toggleComparisonMode() {
+            comparisonMode = !comparisonMode;
+            const overlay = document.getElementById('compareOverlay');
+            const mainCanvas = document.getElementById('cellCanvas');
+            const btn = document.getElementById('compareBtn');
+            if (comparisonMode) {
+                overlay.classList.remove('hidden');
+                mainCanvas.style.display = 'none';
+                btn.classList.add('bg-blue-100', 'dark:bg-blue-900/30');
+                btn.innerHTML = '<i class="fas fa-flask mr-1"></i> Exit Comparison';
+                drawCompare();
+            } else {
+                overlay.classList.add('hidden');
+                mainCanvas.style.display = 'block';
+                btn.classList.remove('bg-blue-100', 'dark:bg-blue-900/30');
+                btn.innerHTML = '<i class="fas fa-flask mr-1"></i> Compare Lab vs Host';
+            }
+        }
+
+        // ===== UPDATE SIMULATION (LIVE CHARTS) =====
+        function updateSimulation() {
+            const g = parseInt(document.getElementById('input-glutamine').value);
+            const s = parseInt(document.getElementById('input-starvation').value);
+            const a = parseInt(document.getElementById('input-antibiotic').value);
+
+            document.getElementById('val-glutamine').innerText = g + '%';
+            document.getElementById('val-starvation').innerText = s + '%';
+            document.getElementById('val-antibiotic').innerText = a;
+
+            const vin = (g / 100) * (a / 50) * 50;
+            const thresh = 25 + (s / 100) * 45;
+            const pcn = (1 + (s / 100) * 7).toFixed(1);
+            const killing = vin > thresh;
+
+            // Status
+            const porinEl = document.getElementById('status-porin');
+            if (g > 60) { porinEl.innerText = 'OPEN';
+                porinEl.className = 'font-bold text-[#2E7D32]'; } else if (g > 30) { porinEl.innerText = 'GATED';
+                porinEl.className = 'font-bold text-amber-600'; } else { porinEl.innerText = 'CLOSED';
+                porinEl.className = 'font-bold text-[#D9534F]'; }
+            document.getElementById('status-pcn').innerText = pcn + 'x';
+            document.getElementById('status-vin').innerText = vin > 40 ? 'High' : 'Low';
+            document.getElementById('status-ast').innerHTML = 'SUSCEPTIBLE';
+            document.getElementById('status-ast').className = 'font-bold px-2 py-0.5 rounded text-white bg-[#2E7D32] text-[11px]';
+            const hostEl = document.getElementById('status-host');
+            if (killing) {
+                hostEl.innerText = 'EFFECTIVE LYSIS';
+                hostEl.className = 'font-bold px-2 py-0.5 rounded text-white bg-[#2E7D32] text-[11px]';
+            } else {
+                hostEl.innerText = 'FALSE SUSCEPTIBLE (RESISTANT)';
+                hostEl.className = 'font-bold px-2 py-0.5 rounded text-white bg-[#D9534F] text-[11px]';
+            }
+            const eff = Math.min(100, Math.round((vin / thresh) * 100));
+            document.getElementById('efficacy-label').innerText = eff + '%';
+            const bar = document.getElementById('efficacy-bar');
+            bar.style.width = eff + '%';
+            if (eff > 70) bar.className = 'efficacy-bar h-full bg-[#2E7D32] rounded-full';
+            else if (eff > 40) bar.className = 'efficacy-bar h-full bg-amber-500 rounded-full';
+            else bar.className = 'efficacy-bar h-full bg-[#D9534F] rounded-full';
+
+            // Update Kinetics Chart
+            if (kinChart) {
+                const labs = Array.from({ length: 11 }, (_, i) => i * 10);
+                kinChart.data.datasets[0].data = labs.map(v => ((v / 100) * (a / 50) * 50).toFixed(1));
+                kinChart.data.datasets[1].data = labs.map(() => thresh.toFixed(1));
+                kinChart.update('none');
+            }
+
+            // Update Population Chart
+            if (popChart) {
+                const pd = [];
+                let pop = 100;
+                const slope = killing ? -0.25 : 0.2;
+                for (let i = 0; i < 20; i++) {
+                    pop = Math.max(5, pop + slope * (pop / 10));
+                    pd.push(Math.round(pop));
+                }
+                popChart.data.datasets[0].data = pd;
+                popChart.update('none');
+            }
+
+            logHistory(g, s, a, eff, killing ? 'Kill' : 'Survive');
+            updateUrlHash();
+        }
+
+        // ===== HISTORY =====
+        function logHistory(g, s, a, eff, out) {
+            const now = new Date();
+            const time = now.toLocaleTimeString();
+            const exists = simHistory.length > 0 && simHistory[simHistory.length - 1].g === g && simHistory[simHistory
+                .length - 1].s === s && simHistory[simHistory.length - 1].a === a;
+            if (exists) return;
+            simHistory.push({ time, g, s, a, eff, out });
+            document.getElementById('historyCount').innerText = simHistory.length;
+            const tbody = document.getElementById('historyTableBody');
+            const row = document.createElement('tr');
+            row.className = 'border-b border-slate-100 dark:border-slate-700';
+            row.innerHTML =
+                `<td class='p-1 font-mono'>${time}</td><td class='p-1'>${g}%</td><td class='p-1'>${s}%</td><td class='p-1'>${a}</td><td class='p-1'>${eff}%</td><td class='p-1'><span class='px-1.5 py-0.5 rounded text-[10px] text-white ${out==='Kill'?'bg-green-600':'bg-red-600'}'>${out}</span></td>`;
+            tbody.insertBefore(row, tbody.firstChild);
+            if (simHistory.length === 1) { document.getElementById('historyPanel').classList.remove('hidden'); }
+        }
+
+        function clearHistory() {
+            simHistory = [];
+            document.getElementById('historyTableBody').innerHTML = '';
+            document.getElementById('historyCount').innerText = '0';
+            document.getElementById('historyPanel').classList.add('hidden');
+            showToast('History cleared', 'success');
+        }
+
+        // ===== URL SHARING =====
+        function updateUrlHash() {
+            const g = document.getElementById('input-glutamine').value;
+            const s = document.getElementById('input-starvation').value;
+            const a = document.getElementById('input-antibiotic').value;
+            history.replaceState(null, '', '#sim=' + g + ',' + s + ',' + a);
+        }
+
+        function parseUrlHash() {
+            const h = location.hash.slice(1);
+            if (!h.startsWith('sim=')) return;
+            const parts = h.slice(4).split(',');
+            if (parts.length === 3) {
+                const g = parseInt(parts[0]),
+                    s = parseInt(parts[1]),
+                    a = parseInt(parts[2]);
+                if (!isNaN(g) && !isNaN(s) && !isNaN(a)) {
+                    document.getElementById('input-glutamine').value = Math.max(0, Math.min(100, g));
+                    document.getElementById('input-starvation').value = Math.max(0, Math.min(100, s));
+                    document.getElementById('input-antibiotic').value = Math.max(10, Math.min(100, a));
+                    updateSimulation();
+                    showToast('Simulation state restored from URL', 'success');
+                }
+            }
+        }
+
+        function shareSimulation() {
+            const g = document.getElementById('input-glutamine').value;
+            const s = document.getElementById('input-starvation').value;
+            const a = document.getElementById('input-antibiotic').value;
+            const url = location.origin + location.pathname + '#sim=' + g + ',' + s + ',' + a;
+            navigator.clipboard.writeText(url).then(() => showToast('Shareable URL copied to clipboard!', 'success')).catch(
+                () => showToast('Failed to copy URL', 'error'));
+        }
+
+        function exportSimulation() {
+            if (simHistory.length === 0) { showToast('No simulation data to export', 'error'); return; }
+            const g = document.getElementById('input-glutamine').value;
+            const s = document.getElementById('input-starvation').value;
+            const a = document.getElementById('input-antibiotic').value;
+            const data = {
+                project: 'The Metabolic Blind Spot',
+                exportedAt: new Date().toISOString(),
+                currentState: { glutamine: g, starvation: s, antibiotic: a },
+                history: simHistory
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const aEl = document.createElement('a');
+            aEl.href = url;
+            aEl.download = 'metabolic_blind_spot_simulation.json';
+            aEl.click();
+            URL.revokeObjectURL(url);
+            showToast('Simulation exported as JSON', 'success');
+        }
+
+        // ===== ABSTRACT FUNCTIONS =====
+        function copyAbstract() {
+            const text = document.getElementById('abstract-text').innerText;
+            navigator.clipboard.writeText(text).then(() => showToast('Abstract copied to clipboard!', 'success')).catch(() =>
+                showToast('Failed to copy', 'error'));
+        }
+
+        function toggleAbstract() {
+            const el = document.getElementById('abstract-text');
+            const btn = document.getElementById('abstractToggle');
+            if (el.classList.contains('max-h-32')) {
+                el.classList.remove('max-h-32');
+                el.classList.add('max-h-[600px]');
+                btn.innerText = 'Show Less';
+            } else {
+                el.classList.add('max-h-32');
+                el.classList.remove('max-h-[600px]');
+                btn.innerText = 'Show More';
+            }
+        }
+
+        // ===== REFERENCE FILTER =====
+        function filterReferences() {
+            const q = document.getElementById('ref-search').value.toLowerCase();
+            document.querySelectorAll('.ref-item').forEach(el => {
+                el.style.display = el.innerText.toLowerCase().includes(q) ? 'block' : 'none';
+            });
+        }
+
+        // ===== CLOCK =====
+        function updateClock() {
+            const elapsed = Math.floor((Date.now() - simStartTime) / 1000);
+            const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+            const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+            const s = String(elapsed % 60).padStart(2, '0');
+            const el = document.getElementById('simClock');
+            if (el) el.innerText = `${h}:${m}:${s}`;
+        }
+
+        // ===== PROGRESS BAR =====
+        function updateProgressBar() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            const btn = document.getElementById('backToTop');
+            if (scrollTop > 400) { btn.classList.remove('opacity-0', 'pointer-events-none'); } else { btn.classList.add(
+                    'opacity-0', 'pointer-events-none'); }
+        }
+
+        // ===== DARK MODE =====
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('moonIcon').classList.toggle('hidden');
+            document.getElementById('sunIcon').classList.toggle('hidden');
+            [astChart, kinChart, popChart].forEach(ch => {
+                if (ch) {
+                    const tc = isDark ? '#CBD5E1' : '#475569';
+                    const gc = isDark ? '#334155' : '#E2E8F0';
+                    ch.options.plugins.legend.labels.color = tc;
+                    ch.options.scales.x.ticks.color = tc;
+                    ch.options.scales.y.ticks.color = tc;
+                    ch.options.scales.y.grid.color = gc;
+                    ch.update();
+                }
+            });
+        });
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', e => {
+            if (e.ctrlKey && e.key === 'd') { e.preventDefault();
+                document.getElementById('darkModeToggle').click(); }
+            if (e.ctrlKey && e.key === 'e') { e.preventDefault();
+                exportSimulation(); }
+            if (e.key >= '1' && e.key <= '7') {
+                const tabs = ['executive', 'overview', 'simulator', 'mechanisms', 'solutions', 'references', 'authors'];
+                switchTab(tabs[parseInt(e.key) - 1]);
+            }
+        });
+
+        // ===== SCROLL & OBSERVER =====
+        window.addEventListener('scroll', () => { requestAnimationFrame(updateProgressBar); });
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+
+        // ===== INIT =====
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('moonIcon').classList.remove('hidden');
+                document.getElementById('sunIcon').classList.add('hidden');
+            }
+
+            // DO NOT initialize charts here. They will be initialized lazily when tabs are first opened.
+
+            // Prepare canvas particles
+            createParticles(30);
+            createAtp(6);
+
+            // Initial draw for the canvas (it is visible by default? No, it's hidden, but we draw anyway)
+            drawCanvas();
+
+            setInterval(updateClock, 1000);
+            parseUrlHash();
+
+            // If the URL hash points to a specific tab, switch to it.
+            const hash = location.hash.slice(1);
+            if (hash && !hash.startsWith('sim=')) {
+                const tabMap = {
+                    'executive': 'executive',
+                    'overview': 'overview',
+                    'simulator': 'simulator',
+                    'mechanisms': 'mechanisms',
+                    'solutions': 'solutions',
+                    'references': 'references',
+                    'authors': 'authors'
+                };
+                if (tabMap[hash]) switchTab(tabMap[hash]);
+            }
+        });
+    </script>
+</body>
+</html>
