@@ -1,1 +1,367 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAST Framework Prototype | Supplementary File 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clinical: { dark: '#0F2C59', light: '#F8FAFC' },
+                        danger: '#D9534F',
+                        success: '#2E7D32'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F8FAFC; color: #2D3748; font-family: 'Inter', system-ui, sans-serif; }
+        .card { background: #ffffff; border: 1px solid #E2E8F0; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-btn { transition: all 0.2s; border-bottom: 3px solid transparent; }
+        .tab-btn.active { border-bottom-color: #0F2C59; color: #0F2C59; font-weight: 700; background-color: #EFF6FF; }
+        .tab-btn:hover:not(.active) { background-color: #F1F5F9; }
+        .efficacy-bar { transition: width 0.4s ease, background-color 0.4s ease; }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
 
+    <!-- HEADER -->
+    <header class="bg-clinical-dark text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">Metabolism-Aware Susceptibility Testing (MAST) Framework</h1>
+                <p class="text-blue-200 text-xs mt-1">Interactive Clinical Decision Support Prototype | Supplementary File 1</p>
+            </div>
+            <div class="text-right text-xs text-blue-200">
+                <p><strong>Authors:</strong> Hasan, M.T.*, Khan, M.S.</p>
+                <p>Department of Computer Science & Engineering</p>
+                <p>Manarat International University, Bangladesh</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 flex space-x-6 text-sm">
+            <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn active py-3 px-2 text-gray-600"><i class="fas fa-sliders-h mr-2"></i>Predictive Simulator</button>
+            <button onclick="switchTab('mechanisms')" id="tab-mechanisms" class="tab-btn py-3 px-2 text-gray-600"><i class="fas fa-dna mr-2"></i>Molecular Mechanisms</button>
+            <button onclick="switchTab('references')" id="tab-references" class="tab-btn py-3 px-2 text-gray-600"><i class="fas fa-book mr-2"></i>References & Methodology</button>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-6 py-6">
+
+        <!-- SIMULATOR TAB -->
+        <section id="sec-simulator" class="space-y-6">
+            
+            <div class="card p-5">
+                <h2 class="text-lg font-bold text-clinical-dark mb-2">System Instantiation: Metabolic Simulation Engine</h2>
+                <p class="text-sm text-gray-600">This interface simulates the biophysical equations described in Methods (Module 2). Adjust the environmental variables to visualize the resulting changes in OmpF permeability, plasmid copy number, and the predicted clinical efficacy score.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Controls -->
+                <div class="lg:col-span-4 card p-5 space-y-6">
+                    <h3 class="text-sm font-bold text-clinical-dark border-b pb-2"><i class="fas fa-cogs mr-2"></i>Simulation Controls</h3>
+                    
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <label class="font-bold text-gray-700">Glutamine Availability (Mechanism 1)</label>
+                            <span id="val-glutamine" class="font-mono font-bold text-clinical-dark">80%</span>
+                        </div>
+                        <input type="range" id="input-glutamine" min="0" max="100" value="80" class="w-full accent-clinical-dark" oninput="updateSimulation()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <label class="font-bold text-gray-700">Starvation / ppGpp Stress (Mechanism 2)</label>
+                            <span id="val-starvation" class="font-mono font-bold text-danger">15%</span>
+                        </div>
+                        <input type="range" id="input-starvation" min="0" max="100" value="15" class="w-full accent-danger" oninput="updateSimulation()">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <label class="font-bold text-gray-700">Antibiotic Dosage (µg/mL)</label>
+                            <span id="val-antibiotic" class="font-mono font-bold text-gray-800">50</span>
+                        </div>
+                        <input type="range" id="input-antibiotic" min="10" max="100" value="50" class="w-full accent-gray-700" oninput="updateSimulation()">
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded border space-y-2 text-xs font-mono">
+                        <div class="flex justify-between"><span>OmpF Gate:</span> <span id="status-porin" class="font-bold text-success">OPEN</span></div>
+                        <div class="flex justify-between"><span>Plasmid PCN:</span> <span id="status-pcn" class="font-bold">1.0x</span></div>
+                        <div class="flex justify-between border-t pt-2 mt-2">
+                            <span>Standard AST:</span> <span class="font-bold text-success">SUSCEPTIBLE</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>MAST Risk Score:</span> <span id="status-mast" class="font-bold text-success">LOW RISK</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-bold text-gray-700">Predicted Clinical Efficacy</span>
+                            <span id="efficacy-label" class="font-bold text-success">75%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="efficacy-bar" class="efficacy-bar h-3 rounded-full bg-success" style="width:75%"></div>
+                        </div>
+                    </div>
+
+                    <button onclick="exportCSV()" class="w-full bg-clinical-dark text-white text-xs py-2 rounded hover:bg-blue-900 transition"><i class="fas fa-download mr-1"></i> Export Simulation Data (CSV)</button>
+                </div>
+
+                <!-- Visuals -->
+                <div class="lg:col-span-8 space-y-4">
+                    <div class="card p-4">
+                        <h4 class="text-xs font-bold text-clinical-dark mb-2">Dynamic Bacterial Cross-Section</h4>
+                        <div class="w-full bg-gray-900 rounded overflow-hidden">
+                            <canvas id="cellCanvas" width="700" height="250"></canvas>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="card p-4">
+                            <h4 class="text-xs font-bold text-clinical-dark mb-2">Kinetic Threshold (Vin vs Clearance)</h4>
+                            <canvas id="kineticsChart" height="150"></canvas>
+                        </div>
+                        <div class="card p-4">
+                            <h4 class="text-xs font-bold text-danger mb-2">Population Dynamics</h4>
+                            <canvas id="populationChart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MECHANISMS TAB -->
+        <section id="sec-mechanisms" class="hidden space-y-6">
+            <div class="card p-6">
+                <h2 class="text-lg font-bold text-clinical-dark mb-4">The Two-Mechanism Model</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border-l-4 border-blue-500 pl-4 py-2">
+                        <h3 class="font-bold text-blue-700">Mechanism 1: Nutrient-Driven Permeability</h3>
+                        <p class="text-sm text-gray-600 mt-2">Glutamine depletion triggers the CpxA/CpxR stress response, downregulating OmpF porins. This structural adaptation closes the primary channel for antibiotic influx (Vin), conferring functional resistance without genetic mutation.</p>
+                    </div>
+                    <div class="border-l-4 border-danger pl-4 py-2">
+                        <h3 class="font-bold text-danger">Mechanism 2: Starvation-Induced Gene Dosage</h3>
+                        <p class="text-sm text-gray-600 mt-2">Host starvation activates the ppGpp alarmone. This cascade derepresses silent resistance determinants (e.g., tetA, aadA) and drives plasmid copy number (PCN) amplification up to 89-fold, neutralizing internalized drugs.</p>
+                    </div>
+                </div>
+                <div class="mt-6 bg-gray-50 p-4 rounded border text-center">
+                    <p class="font-mono text-lg font-bold text-clinical-dark">Vin > 4(Ve + Vh)</p>
+                    <p class="text-xs text-gray-500 mt-1">The therapeutic drug velocity threshold at MIC</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- REFERENCES TAB -->
+        <section id="sec-references" class="hidden space-y-6">
+            <div class="card p-6">
+                <h2 class="text-lg font-bold text-clinical-dark mb-4">Methodology & References</h2>
+                <p class="text-sm text-gray-600 mb-4">This prototype instantiates the three-module MAST architecture using HTML5, Tailwind CSS, and Chart.js. The mathematical logic is based on the following foundational literature:</p>
+                <ul class="space-y-3 text-sm">
+                    <li class="p-3 bg-gray-50 rounded border"><strong>[1]</strong> Ahmad, M., et al. (2025). The role of bacterial metabolism in antimicrobial resistance. <em>Nature Reviews Microbiology</em>.</li>
+                    <li class="p-3 bg-gray-50 rounded border"><strong>[2]</strong> Belanger, C.R., Hancock, R.E.W. (2021). Testing physiologically relevant conditions in minimal inhibitory concentration assays. <em>Nat Protoc</em>, 16, 3761–3774.</li>
+                    <li class="p-3 bg-gray-50 rounded border"><strong>[3]</strong> Batchelor E, Walthers D, Kenney LJ, Goulian M (2005). The Escherichia coli CpxA-CpxR Envelope Stress Response System Regulates Expression of the Porins OmpF and OmpC. <em>J Bacteriol</em>, 187.</li>
+                    <li class="p-3 bg-gray-50 rounded border"><strong>[4]</strong> Wang, H., & Joffré, E. (2025). Plasmid copy number as a modulator in bacterial pathogenesis and antibiotic resistance. <em>npj Antimicrobials and Resistance</em>.</li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t py-4 text-center text-xs text-gray-500">
+        MAST Framework Clinical Prototype v1.0 | Supplementary File 1 for JOMS Submission | Open-Source Artifact
+    </footer>
+
+    <script>
+        // TAB SWITCHING
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById('sec-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('active');
+
+            if (tabId === 'simulator') {
+                if (!window.chartsInitialized) {
+                    initCharts();
+                    window.chartsInitialized = true;
+                }
+                updateSimulation();
+            }
+        }
+
+        // CHART INITIALIZATION
+        let kinChart, popChart;
+
+        function initCharts() {
+            // Kinetics Chart
+            const ctxKin = document.getElementById('kineticsChart').getContext('2d');
+            kinChart = new Chart(ctxKin, {
+                type: 'line',
+                data: {
+                    labels: ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'],
+                    datasets: [
+                        { label: 'Drug Influx (Vin)', data: [], borderColor: '#0F2C59', backgroundColor: 'rgba(15,44,89,0.1)', fill: true, tension: 0.3 },
+                        { label: 'Clearance Threshold', data: [], borderColor: '#D9534F', borderDash: [5, 5], pointRadius: 0 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 }, x: { title: { display: true, text: 'Glutamine Concentration (%)', font: {size: 10} } } } }
+            });
+
+            // Population Chart
+            const ctxPop = document.getElementById('populationChart').getContext('2d');
+            popChart = new Chart(ctxPop, {
+                type: 'line',
+                data: {
+                    labels: ['0h', '1h', '2h', '3h', '4h', '5h', '6h'],
+                    datasets: [{ label: 'Bacterial Survival', data: [], borderColor: '#D9534F', backgroundColor: 'rgba(217,83,79,0.1)', fill: true, tension: 0.4, pointRadius: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 120 }, x: { title: { display: true, text: 'Time (Hours)', font: {size: 10} } } } }
+            });
+        }
+
+        // SIMULATION LOGIC
+        function updateSimulation() {
+            const g = parseInt(document.getElementById('input-glutamine').value);
+            const s = parseInt(document.getElementById('input-starvation').value);
+            const a = parseInt(document.getElementById('input-antibiotic').value);
+
+            // Update UI Labels
+            document.getElementById('val-glutamine').innerText = g + '%';
+            document.getElementById('val-starvation').innerText = s + '%';
+            document.getElementById('val-antibiotic').innerText = a;
+
+            // Core Math (Module 2)
+            const vin = (g / 100) * (a / 50) * 50;
+            const thresh = 25 + (s / 100) * 45;
+            const pcn = (1 + (s / 100) * 7).toFixed(1);
+            const killing = vin > thresh;
+
+            // Update Status Panel
+            const porinEl = document.getElementById('status-porin');
+            if (g > 60) { porinEl.innerText = 'OPEN'; porinEl.className = 'font-bold text-success'; }
+            else if (g > 30) { porinEl.innerText = 'GATED'; porinEl.className = 'font-bold text-amber-500'; }
+            else { porinEl.innerText = 'CLOSED'; porinEl.className = 'font-bold text-danger'; }
+
+            document.getElementById('status-pcn').innerText = pcn + 'x';
+            
+            const mastEl = document.getElementById('status-mast');
+            if (killing) {
+                mastEl.innerText = 'LOW RISK';
+                mastEl.className = 'font-bold text-success';
+            } else {
+                mastEl.innerText = 'HIGH RISK (False Susceptibility)';
+                mastEl.className = 'font-bold text-danger';
+            }
+
+            // Update Efficacy Bar
+            const eff = Math.min(100, Math.round((vin / thresh) * 100));
+            document.getElementById('efficacy-label').innerText = eff + '%';
+            const bar = document.getElementById('efficacy-bar');
+            bar.style.width = eff + '%';
+            bar.className = 'efficacy-bar h-3 rounded-full ' + (eff > 70 ? 'bg-success' : eff > 40 ? 'bg-amber-500' : 'bg-danger');
+
+            // Update Charts
+            if (kinChart && popChart) {
+                const labValues = [0,10,20,30,40,50,60,70,80,90,100];
+                kinChart.data.datasets[0].data = labValues.map(v => (v / 100) * a);
+                kinChart.data.datasets[1].data = labValues.map(() => thresh);
+                kinChart.update('none');
+
+                const popData = [];
+                let pop = 100;
+                const slope = killing ? -15 : 5;
+                for (let i = 0; i < 7; i++) { pop = Math.max(0, pop + slope); popData.push(pop); }
+                popChart.data.datasets[0].data = popData;
+                popChart.update('none');
+            }
+
+            // Draw Canvas
+            drawCell(g, s);
+        }
+
+        // CANVAS DRAWING (Bacterial Cross-Section)
+        const canvas = document.getElementById('cellCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawCell(g, s) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Backgrounds
+            ctx.fillStyle = '#1E293B'; ctx.fillRect(0, 0, canvas.width, 70); // Extracellular
+            ctx.fillStyle = '#334155'; ctx.fillRect(0, 70, canvas.width, 10); // Outer Membrane
+            ctx.fillStyle = '#0F172A'; ctx.fillRect(0, 80, canvas.width, canvas.height - 80); // Cytoplasm
+
+            // Labels
+            ctx.fillStyle = '#94A3B8'; ctx.font = '10px monospace';
+            ctx.fillText('EXTRACELLULAR SPACE', 15, 20);
+            ctx.fillText('PERIPLASM', 15, 95);
+
+            // Draw OmpF Porins (Mechanism 1)
+            const porinCount = 5; const spacing = canvas.width / (porinCount + 1);
+            for (let i = 1; i <= porinCount; i++) {
+                const x = i * spacing;
+                ctx.fillStyle = g > 40 ? '#10B981' : '#EF4444'; // Green = Open, Red = Closed
+                ctx.fillRect(x - 10, 70, 20, 10);
+            }
+
+            // Draw Efflux Pumps (Mechanism 2)
+            if (s > 50) {
+                ctx.fillStyle = '#F97316'; // Orange
+                for (let i = 1; i <= 3; i++) {
+                    const x = i * (canvas.width / 4);
+                    ctx.beginPath(); ctx.moveTo(x - 10, 80); ctx.lineTo(x, 60); ctx.lineTo(x + 10, 80); ctx.fill();
+                }
+            }
+
+            // Draw Plasmids (Mechanism 2)
+            const pcn = Math.floor(1 + (s / 100) * 6);
+            ctx.strokeStyle = '#C084FC'; ctx.lineWidth = 2;
+            for (let i = 0; i < pcn; i++) {
+                ctx.beginPath();
+                ctx.ellipse(canvas.width/2 + (i%3)*80 - 80, 150 + Math.floor(i/3)*50, 15, 8, 0, 0, Math.PI*2);
+                ctx.stroke();
+            }
+        }
+
+        // EXPORT CSV
+        function exportCSV() {
+            const g = document.getElementById('input-glutamine').value;
+            const s = document.getElementById('input-starvation').value;
+            const a = document.getElementById('input-antibiotic').value;
+            const eff = document.getElementById('efficacy-label').innerText;
+            
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + "Parameter,Value\n"
+                + "Glutamine (%)," + g + "\n"
+                + "Starvation (%)," + s + "\n"
+                + "Antibiotic Dosage (ug/mL)," + a + "\n"
+                + "Predicted Clinical Efficacy," + eff;
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "MAST_Simulation_Data.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // INIT
+        window.onload = () => {
+            initCharts();
+            updateSimulation();
+            window.chartsInitialized = true;
+        };
+    </script>
+</body>
+</html>
