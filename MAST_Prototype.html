@@ -3,239 +3,760 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MAST Framework: Metabolism-Aware Susceptibility Testing — Interactive Clinical Decision Support Prototype">
     <title>MAST Framework Prototype | Supplementary File 1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        clinical: { dark: '#0F2C59', light: '#F8FAFC' },
+                        primary: '#0F2C59',
+                        secondary: '#003366',
                         danger: '#D9534F',
-                        success: '#2E7D32'
+                        success: '#2E7D32',
+                        amber: '#F59E0B'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #F8FAFC; color: #2D3748; font-family: 'Inter', system-ui, sans-serif; }
-        .card { background: #ffffff; border: 1px solid #E2E8F0; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .tab-btn { transition: all 0.2s; border-bottom: 3px solid transparent; }
-        .tab-btn.active { border-bottom-color: #0F2C59; color: #0F2C59; font-weight: 700; background-color: #EFF6FF; }
-        .tab-btn:hover:not(.active) { background-color: #F1F5F9; }
+        :root {
+            --primary: #0F2C59; --primary-light: #1A3F7A; --danger: #D9534F;
+            --success: #2E7D32; --bg: #FAFAFA; --fg: #2D3748;
+            --card: #ffffff; --border: #E2E8F0;
+        }
+        .dark {
+            --bg: #0B1120; --fg: #E2E8F0; --card: #0F172A; --border: #1E293B;
+        }
+        body { background: var(--bg); color: var(--fg); font-family: 'Inter', system-ui, sans-serif; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; }
+        .tab-btn { transition: all 0.2s ease; font-weight: 600; font-size: 0.75rem;
+                   padding: 0.5rem 0.75rem; border-radius: 0.5rem; color: #64748B;
+                   border-bottom: 3px solid transparent; white-space: nowrap; }
+        .tab-btn:hover { background: #F1F5F9; color: var(--primary); }
+        .dark .tab-btn:hover { background: #1E293B; color: #93C5FD; }
+        .tab-btn.active { color: var(--primary); background: #EFF6FF;
+                          border-bottom-color: var(--primary); border-radius: 0.5rem 0.5rem 0 0; }
+        .dark .tab-btn.active { color: #93C5FD; background: rgba(59,130,246,0.15); border-bottom-color: #93C5FD; }
         .efficacy-bar { transition: width 0.4s ease, background-color 0.4s ease; }
+        .fade-in-up { opacity: 0; transform: translateY(8px); transition: opacity 0.4s, transform 0.4s; }
+        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+        .chart-container { position: relative; width: 100%; height: 260px; }
+        .chart-container-sm { position: relative; width: 100%; height: 200px; }
+        @media print {
+            nav, footer, .no-print { display: none !important; }
+            .fade-in-up { opacity: 1 !important; transform: none !important; }
+        }
+        .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
+        .matrix-table th { background: #F1F5F9; color: var(--primary); font-weight: 700;
+                           padding: 0.5rem 0.6rem; text-align: left; border-bottom: 2px solid #E2E8F0; }
+        .dark .matrix-table th { background: #1E293B; color: #93C5FD; border-bottom-color: #334155; }
+        .matrix-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #F1F5F9; }
+        .dark .matrix-table td { border-bottom-color: #1E293B; }
+        .keyword-tag { display: inline-block; background: #E0E7FF; color: #3730A3;
+                       font-size: 0.6rem; font-weight: 600; padding: 0.15rem 0.6rem;
+                       border-radius: 9999px; margin: 0.1rem 0.15rem; }
+        .dark .keyword-tag { background: #1E1B4B; color: #A5B4FC; }
+        #cellCanvas { width: 100%; height: 260px; display: block; }
+        @media (min-width: 768px) { #cellCanvas { height: 300px; } }
     </style>
 </head>
+
 <body class="antialiased min-h-screen flex flex-col">
 
-    <!-- HEADER -->
-    <header class="bg-clinical-dark text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold tracking-tight">Metabolism-Aware Susceptibility Testing (MAST) Framework</h1>
-                <p class="text-blue-200 text-xs mt-1">Interactive Clinical Decision Support Prototype | Supplementary File 1</p>
-            </div>
-            <div class="text-right text-xs text-blue-200">
-                <p><strong>Authors:</strong> Hasan, M.T.*, Khan, M.S.</p>
-                <p>Department of Computer Science & Engineering</p>
-                <p>Manarat International University, Bangladesh</p>
+    <!-- HEADER (Academic) -->
+    <header class="bg-[#0F2C59] text-white shadow-lg border-b-4 border-[#003366]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-2">
+                        <span class="bg-[#D9534F] text-white text-[0.6rem] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                            <i class="fas fa-file-alt mr-1"></i> Supplementary File 1
+                        </span>
+                        <span class="bg-[#003366] text-blue-100 text-[0.6rem] font-semibold px-2.5 py-0.5 rounded-full">
+                            <i class="fas fa-code mr-1"></i> Open-Source Artifact
+                        </span>
+                        <span class="bg-amber-500 text-[#0F2C59] text-[0.6rem] font-bold px-2.5 py-0.5 rounded-full">
+                            <i class="fas fa-microscope mr-1"></i> Design Science Research
+                        </span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+                        Metabolism-Aware Susceptibility Testing (MAST) Framework
+                    </h1>
+                    <p class="text-blue-200 text-sm mt-1 max-w-4xl">
+                        Interactive Clinical Decision Support Prototype — Instantiating the Three-Module Computational Architecture for Antimicrobial Resistance
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="darkModeToggle" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors" aria-label="Toggle dark mode">
+                        <i id="moonIcon" class="fas fa-moon hidden"></i>
+                        <i id="sunIcon" class="fas fa-sun"></i>
+                    </button>
+                    <div class="bg-[#003366]/60 p-3 rounded-lg border border-blue-400/30 text-xs text-blue-100 min-w-[220px]">
+                        <p class="font-bold text-white mb-1"><i class="fas fa-users mr-1"></i> Authors:</p>
+                        <p>Muhammad Tasnimul Hasan*</p>
+                        <p>Mahfuza Siddika Khan</p>
+                        <p class="text-blue-300 text-[0.6rem] mt-0.5">Department of Computer Science & Engineering</p>
+                        <p class="text-blue-300 text-[0.6rem]">Manarat International University, Bangladesh</p>
+                        <p class="text-[0.55rem] text-blue-200 mt-1 font-mono">
+                            <i class="fas fa-envelope mr-1"></i>muhammadtasnimulhasan01@gmail.com
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- NAVIGATION -->
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 flex space-x-6 text-sm">
-            <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn active py-3 px-2 text-gray-600"><i class="fas fa-sliders-h mr-2"></i>Predictive Simulator</button>
-            <button onclick="switchTab('mechanisms')" id="tab-mechanisms" class="tab-btn py-3 px-2 text-gray-600"><i class="fas fa-dna mr-2"></i>Molecular Mechanisms</button>
-            <button onclick="switchTab('references')" id="tab-references" class="tab-btn py-3 px-2 text-gray-600"><i class="fas fa-book mr-2"></i>References & Methodology</button>
+    <nav class="bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-1 sm:space-x-3 overflow-x-auto py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <button onclick="switchTab('executive')" id="tab-executive" class="tab-btn active" aria-selected="true">
+                    <i class="fas fa-chart-pie mr-1"></i> Executive Summary
+                </button>
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> AMR Void
+                </button>
+                <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn">
+                    <i class="fas fa-sliders-h mr-1"></i> Predictive Simulator
+                </button>
+                <button onclick="switchTab('mechanisms')" id="tab-mechanisms" class="tab-btn">
+                    <i class="fas fa-dna mr-1"></i> Mechanistic Framework
+                </button>
+                <button onclick="switchTab('roadmap')" id="tab-roadmap" class="tab-btn">
+                    <i class="fas fa-road mr-1"></i> Translational Roadmap
+                </button>
+                <button onclick="switchTab('references')" id="tab-references" class="tab-btn">
+                    <i class="fas fa-book mr-1"></i> References
+                </button>
+                <button onclick="switchTab('authors')" id="tab-authors" class="tab-btn">
+                    <i class="fas fa-user-graduate mr-1"></i> Abstract & Contributions
+                </button>
+            </div>
         </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-6 py-6">
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- SIMULATOR TAB -->
-        <section id="sec-simulator" class="space-y-6">
-            
-            <div class="card p-5">
-                <h2 class="text-lg font-bold text-clinical-dark mb-2">System Instantiation: Metabolic Simulation Engine</h2>
-                <p class="text-sm text-gray-600">This interface simulates the biophysical equations described in Methods (Module 2). Adjust the environmental variables to visualize the resulting changes in OmpF permeability, plasmid copy number, and the predicted clinical efficacy score.</p>
+        <!-- ============ EXECUTIVE SUMMARY ============ -->
+        <section id="sec-executive" class="space-y-6 fade-in-up visible">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="card p-5 border-l-4 border-l-[#D9534F]">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Global AMR Burden</span><i class="fas fa-skull-crossbones text-[#D9534F] text-lg"></i></div>
+                    <div class="text-3xl font-extrabold text-[#D9534F] mt-1">1.91M</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Annual attributable deaths by 2050</div>
+                </div>
+                <div class="card p-5 border-l-4 border-l-[#0F2C59]">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Bangladesh Burden</span><i class="fas fa-hospital text-[#0F2C59] dark:text-blue-300 text-lg"></i></div>
+                    <div class="text-3xl font-extrabold text-[#0F2C59] dark:text-blue-300 mt-1">26,648</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Deaths from carbapenem-R infections (2019)</div>
+                </div>
+                <div class="card p-5 border-l-4 border-l-amber-500">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Treatment Gap</span><i class="fas fa-times-circle text-amber-500 text-lg"></i></div>
+                    <div class="text-3xl font-extrabold text-amber-600 mt-1">0.96%</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Patients receiving appropriate antibiotics</div>
+                </div>
+                <div class="card p-5 border-l-4 border-l-[#2E7D32]">
+                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">PCN Amplification</span><i class="fas fa-dna text-[#2E7D32] text-lg"></i></div>
+                    <div class="text-3xl font-extrabold text-[#2E7D32] mt-1">3× – 89×</div>
+                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">Cryptic gene dosage surge in host</div>
+                </div>
+            </div>
+
+            <div class="card p-6 bg-gradient-to-br from-[#0F2C59] to-[#003366] text-white">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-400 mb-2"><i class="fas fa-quote-left mr-2"></i> Core Diagnostic Imperative</h3>
+                <p class="text-base sm:text-lg font-semibold italic leading-snug">
+                    "Metabolic state is not a confounding variable in antimicrobial testing; it is the definitive variable governing bacterial survival <em>in vivo</em>."
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="bg-white/10 px-3 py-1 rounded-full text-xs">Two-Mechanism Model</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-full text-xs">OmpF Porin Gating</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-full text-xs">Cryptic Gene Derepression</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-full text-xs">Design Science Research</span>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-4">
+                    <i class="fas fa-timeline mr-2 text-[#D9534F]"></i> Research Trajectory: From Flaw to Solution
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div class="text-center p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/30">
+                        <div class="w-10 h-10 rounded-full bg-[#D9534F] text-white flex items-center justify-center text-sm font-bold mx-auto mb-2">1</div>
+                        <span class="text-sm font-extrabold text-[#D9534F] block">WHAT?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 mt-1">AST tests lab media, not patient</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30">
+                        <div class="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold mx-auto mb-2">2</div>
+                        <span class="text-sm font-extrabold text-amber-600 block">HOW?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 mt-1">Porin closure + gene derepression</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30">
+                        <div class="w-10 h-10 rounded-full bg-[#003366] text-white flex items-center justify-center text-sm font-bold mx-auto mb-2">3</div>
+                        <span class="text-sm font-extrabold text-[#003366] dark:text-blue-300 block">WHY?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 mt-1">V<sub>in</sub> below clearance threshold</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-teal-50 dark:bg-teal-900/10 border border-teal-200 dark:border-teal-800/30">
+                        <div class="w-10 h-10 rounded-full bg-teal-500 text-white flex items-center justify-center text-sm font-bold mx-auto mb-2">4</div>
+                        <span class="text-sm font-extrabold text-teal-600 block">WHEN?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 mt-1">Lab broth vs. host gut</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/30">
+                        <div class="w-10 h-10 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-sm font-bold mx-auto mb-2">5</div>
+                        <span class="text-sm font-extrabold text-[#2E7D32] block">WHAT NOW?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 mt-1">MAST architecture + prototype</p>
+                    </div>
+                    <div class="text-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-800/30">
+                        <div class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold mx-auto mb-2">6</div>
+                        <span class="text-sm font-extrabold text-purple-600 block">SO WHAT?</span>
+                        <p class="text-[0.6rem] text-slate-600 dark:text-slate-400 mt-1">Metabolic state is the variable</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ AMR VOID ============ -->
+        <section id="sec-overview" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2">
+                    <i class="fas fa-exclamation-triangle text-[#D9534F] mr-2"></i>The Global AMR Crisis & Diagnostic Limitations
+                </h2>
+                <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
+                    Standard Antimicrobial Susceptibility Testing (AST) relies on hyper-nutritious Mueller-Hinton broth. Inside the human body — particularly the gastrointestinal tract — bacteria encounter severe nutrient constraints that trigger metabolically conditional resistance states, producing dangerous <strong>false susceptibility</strong> scores.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="card p-5 border-l-4 border-l-[#D9534F]">
+                        <h3 class="text-sm font-bold text-[#D9534F] flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-[#D9534F] text-white flex items-center justify-center text-[0.6rem] font-bold">1</span>
+                            The Flaw — WHAT
+                        </h3>
+                        <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mt-2">
+                            Antimicrobial resistance is conventionally treated as a static, genetically encoded trait. <strong>This is incomplete.</strong> Resistance is a <strong>metabolically conditional phenotype</strong> regulated by environmental nutrient availability.
+                        </p>
+                        <ul class="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-400">
+                            <li class="flex items-start gap-2"><span class="text-[#D9534F] font-bold">✕</span><div><strong>Standard AST:</strong> Forces metabolic hyper-activation, artificially inflating OmpF porin density and drug influx (V<sub>in</sub>).</div></li>
+                            <li class="flex items-start gap-2"><span class="text-[#2E7D32] font-bold">✓</span><div><strong>Host Reality:</strong> Nutrient-constrained niches cause OmpF closure and derepress silent resistance genes (<em>tetA</em>, <em>aadA</em>).</div></li>
+                        </ul>
+                    </div>
+
+                    <div class="card p-5 border-l-4 border-l-amber-500">
+                        <h3 class="text-sm font-bold text-amber-600 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[0.6rem] font-bold">2</span>
+                            The Molecular Mechanisms — HOW
+                        </h3>
+                        <div class="mt-2 space-y-3">
+                            <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                                <p class="text-xs font-bold text-[#003366] dark:text-blue-300">Mechanism 1 — Membrane Permeability</p>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Glutamine depletion → CpxA/R signaling → OmpF ↓ → reduced β-lactam, tetracycline, and aminoglycoside influx.</p>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                                <p class="text-xs font-bold text-[#D9534F] dark:text-red-300">Mechanism 2 — Cryptic Gene Derepression</p>
+                                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Starvation → ppGpp ↑ → H-NS dissociation → PCN amplification (3×–89×) → enzymatic neutralization.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-5 border-l-4 border-l-[#003366]">
+                        <h3 class="text-sm font-bold text-[#003366] dark:text-blue-300 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-[#003366] text-white flex items-center justify-center text-[0.6rem] font-bold">3</span>
+                            The Math & Diagnostic Failure — WHY
+                        </h3>
+                        <div class="mt-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center">
+                            <p class="text-sm font-mono font-bold text-[#003366] dark:text-blue-300">V<sub>in</sub> &gt; 4(V<sub>e</sub> + V<sub>h</sub>)</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Therapeutic influx threshold at MIC</p>
+                        </div>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">A marginal porin reduction excludes enough antibiotic to confer resistance — <strong>without any genetic mutation</strong>.</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="card p-5 border-l-4 border-l-teal-500">
+                        <h3 class="text-sm font-bold text-teal-600 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-teal-500 text-white flex items-center justify-center text-[0.6rem] font-bold">4</span>
+                            The Environment Split — WHEN
+                        </h3>
+                        <div class="overflow-x-auto mt-2">
+                            <table class="w-full text-[0.65rem] border-collapse">
+                                <thead><tr class="bg-slate-100 dark:bg-slate-800">
+                                    <th class="p-2 text-left">Environment</th><th class="p-2 text-left">Glutamine</th><th class="p-2 text-left">OmpF</th><th class="p-2 text-left">Silent Genes</th><th class="p-2 text-left">Result</th>
+                                </tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-slate-200 dark:border-slate-700">
+                                        <td class="p-2 font-semibold">Lab (MH Broth)</td><td class="p-2 text-emerald-600">High</td><td class="p-2">Open</td><td class="p-2">Locked (H-NS)</td><td class="p-2 font-bold text-[#D9534F]">Artificial Sensitivity</td>
+                                    </tr>
+                                    <tr class="bg-red-50/30 dark:bg-red-900/5">
+                                        <td class="p-2 font-semibold">Host (Gut)</td><td class="p-2 text-red-600">Low</td><td class="p-2 text-red-600">Closed</td><td class="p-2 text-red-600">Activated (ppGpp)</td><td class="p-2 font-bold text-red-600">Clinical Resistance</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card p-5 border-l-4 border-l-[#2E7D32]">
+                        <h3 class="text-sm font-bold text-[#2E7D32] flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-[0.6rem] font-bold">5</span>
+                            Biomedical Action — WHAT NOW
+                        </h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Bridging the void requires four complementary innovations:</p>
+                        <ul class="mt-2 space-y-1 text-sm text-slate-600 dark:text-slate-400">
+                            <li><span class="text-emerald-500 font-bold">①</span> <strong>Host-Mimicking Media (HMDM)</strong> — replace Mueller-Hinton with gut-relevant nutrients</li>
+                            <li><span class="text-blue-500 font-bold">②</span> <strong>Bio-MEMS Single-Cell Assays</strong> — real-time V<sub>in</sub> vs. clearance</li>
+                            <li><span class="text-purple-500 font-bold">③</span> <strong>Metabolomic Adjuvants</strong> — exogenous glutamine to force OmpF open</li>
+                            <li><span class="text-indigo-500 font-bold">④</span> <strong>Computational Flux Modeling</strong> — patient-specific predictive algorithms</li>
+                        </ul>
+                    </div>
+
+                    <div class="card p-5 border-l-4 border-l-purple-600 bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-transparent">
+                        <h3 class="text-sm font-bold text-purple-600 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[0.6rem] font-bold">6</span>
+                            The Bottom Line — SO WHAT
+                        </h3>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 mt-2">
+                            "Metabolic state is not a confounding variable in diagnostic testing — <span class="text-purple-600">it is the variable.</span>"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ PREDICTIVE SIMULATOR ============ -->
+        <section id="sec-simulator" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-1">
+                            <i class="fas fa-sliders-h text-[#003366] mr-2"></i>Predictive Simulator
+                        </h2>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">
+                            Adjust environmental variables to visualize the resulting changes in OmpF permeability, plasmid copy number, and the predicted clinical efficacy score. The simulator is a <strong>mathematical model</strong> that translates the biophysical mechanisms into <strong>real-time visual feedback</strong>.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 no-print">
+                        <button onclick="resetSimulation()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"><i class="fas fa-undo mr-1"></i>Reset</button>
+                        <button onclick="toggleComparisonMode()" id="compareBtn" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"><i class="fas fa-flask mr-1"></i>Compare Lab vs Host</button>
+                        <button onclick="exportCSV()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"><i class="fas fa-download mr-1"></i>Export CSV</button>
+                        <button onclick="shareSimulation()" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800"><i class="fas fa-link mr-1"></i>Share URL</button>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Controls -->
-                <div class="lg:col-span-4 card p-5 space-y-6">
-                    <h3 class="text-sm font-bold text-clinical-dark border-b pb-2"><i class="fas fa-cogs mr-2"></i>Simulation Controls</h3>
-                    
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <label class="font-bold text-gray-700">Glutamine Availability (Mechanism 1)</label>
-                            <span id="val-glutamine" class="font-mono font-bold text-clinical-dark">80%</span>
-                        </div>
-                        <input type="range" id="input-glutamine" min="0" max="100" value="80" class="w-full accent-clinical-dark" oninput="updateSimulation()">
-                    </div>
+                <div class="lg:col-span-4 card p-5 space-y-5">
+                    <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <i class="fas fa-cogs text-[#D9534F] mr-2"></i>Simulation Controls
+                    </h3>
 
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <label class="font-bold text-gray-700">Starvation / ppGpp Stress (Mechanism 2)</label>
-                            <span id="val-starvation" class="font-mono font-bold text-danger">15%</span>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">Glutamine Availability (Mechanism 1)</label>
+                            <span id="val-glutamine" class="font-mono font-bold text-[#003366] dark:text-blue-300">80%</span>
                         </div>
-                        <input type="range" id="input-starvation" min="0" max="100" value="15" class="w-full accent-danger" oninput="updateSimulation()">
+                        <input type="range" id="input-glutamine" min="0" max="100" value="80" class="w-full accent-[#003366]" oninput="updateSimulation()">
                     </div>
 
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <label class="font-bold text-gray-700">Antibiotic Dosage (µg/mL)</label>
-                            <span id="val-antibiotic" class="font-mono font-bold text-gray-800">50</span>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">Starvation / ppGpp Stress (Mechanism 2)</label>
+                            <span id="val-starvation" class="font-mono font-bold text-[#D9534F]">15%</span>
                         </div>
-                        <input type="range" id="input-antibiotic" min="10" max="100" value="50" class="w-full accent-gray-700" oninput="updateSimulation()">
-                    </div>
-
-                    <div class="bg-gray-50 p-3 rounded border space-y-2 text-xs font-mono">
-                        <div class="flex justify-between"><span>OmpF Gate:</span> <span id="status-porin" class="font-bold text-success">OPEN</span></div>
-                        <div class="flex justify-between"><span>Plasmid PCN:</span> <span id="status-pcn" class="font-bold">1.0x</span></div>
-                        <div class="flex justify-between border-t pt-2 mt-2">
-                            <span>Standard AST:</span> <span class="font-bold text-success">SUSCEPTIBLE</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>MAST Risk Score:</span> <span id="status-mast" class="font-bold text-success">LOW RISK</span>
-                        </div>
+                        <input type="range" id="input-starvation" min="0" max="100" value="15" class="w-full accent-[#D9534F]" oninput="updateSimulation()">
                     </div>
 
                     <div>
                         <div class="flex justify-between text-xs mb-1">
-                            <span class="font-bold text-gray-700">Predicted Clinical Efficacy</span>
-                            <span id="efficacy-label" class="font-bold text-success">75%</span>
+                            <label class="font-bold text-slate-700 dark:text-slate-300">Antibiotic Dosage (µg/mL)</label>
+                            <span id="val-antibiotic" class="font-mono font-bold">50</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            <div id="efficacy-bar" class="efficacy-bar h-3 rounded-full bg-success" style="width:75%"></div>
+                        <input type="range" id="input-antibiotic" min="10" max="100" value="50" class="w-full accent-slate-700" oninput="updateSimulation()">
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg space-y-2 text-xs">
+                        <div class="flex justify-between items-center"><span class="text-slate-600 dark:text-slate-400">OmpF Gate</span><span id="status-porin" class="font-bold text-[#2E7D32]">OPEN</span></div>
+                        <div class="flex justify-between items-center"><span class="text-slate-600 dark:text-slate-400">Plasmid PCN</span><span id="status-pcn" class="font-bold">1.0x</span></div>
+                        <div class="flex justify-between items-center"><span class="text-slate-600 dark:text-slate-400">Influx (V<sub>in</sub>)</span><span id="status-vin" class="font-bold text-blue-700 dark:text-blue-300">High</span></div>
+                        <div class="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-2"><span class="font-bold">Standard AST</span><span class="font-bold px-2 py-0.5 rounded text-white bg-[#2E7D32] text-[11px]">SUSCEPTIBLE</span></div>
+                        <div class="flex justify-between items-center"><span class="font-bold">MAST Risk Score</span><span id="status-mast" class="font-bold px-2 py-0.5 rounded text-white bg-[#2E7D32] text-[11px]">LOW RISK</span></div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mb-1">
+                            <span>Predicted Clinical Efficacy</span>
+                            <span id="efficacy-label" class="font-bold text-slate-700 dark:text-slate-300">75%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                            <div id="efficacy-bar" class="efficacy-bar h-full bg-[#2E7D32] rounded-full" style="width:75%"></div>
                         </div>
                     </div>
 
-                    <button onclick="exportCSV()" class="w-full bg-clinical-dark text-white text-xs py-2 rounded hover:bg-blue-900 transition"><i class="fas fa-download mr-1"></i> Export Simulation Data (CSV)</button>
+                    <div id="historyPanel" class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg text-xs hidden">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-slate-600 dark:text-slate-400">History:</span>
+                            <span id="historyCount" class="font-bold">0</span>
+                        </div>
+                        <button onclick="clearHistory()" class="text-[10px] text-red-500 hover:underline"><i class="fas fa-trash-alt mr-1"></i>Clear history</button>
+                    </div>
                 </div>
 
                 <!-- Visuals -->
                 <div class="lg:col-span-8 space-y-4">
-                    <div class="card p-4">
-                        <h4 class="text-xs font-bold text-clinical-dark mb-2">Dynamic Bacterial Cross-Section</h4>
-                        <div class="w-full bg-gray-900 rounded overflow-hidden">
-                            <canvas id="cellCanvas" width="700" height="250"></canvas>
+                    <div class="card p-3">
+                        <h4 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-2">
+                            <i class="fas fa-bacteria mr-1"></i>Dynamic Bacterial Cross-Section
+                        </h4>
+                        <div class="w-full bg-slate-900 rounded-lg overflow-hidden relative">
+                            <canvas id="cellCanvas" width="700" height="300"></canvas>
+                            <div id="compareOverlay" class="absolute inset-0 hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-white/20">
+                                <div class="relative">
+                                    <div class="absolute top-2 left-2 bg-blue-600/80 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10"><i class="fas fa-flask mr-1"></i>LAB (MH Broth)</div>
+                                    <canvas id="compareLabCanvas" width="350" height="300" class="w-full h-full"></canvas>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute top-2 left-2 bg-red-600/80 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10"><i class="fas fa-bacteria mr-1"></i>HOST (Gut)</div>
+                                    <canvas id="compareHostCanvas" width="350" height="300" class="w-full h-full"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap justify-around text-[10px] text-slate-500 dark:text-slate-400 mt-2 gap-2">
+                            <span><span class="w-2 h-2 bg-emerald-500 inline-block rounded-full mr-1"></span>OmpF</span>
+                            <span><span class="w-2 h-2 bg-cyan-400 inline-block rounded-full mr-1"></span>Drug</span>
+                            <span><span class="w-2 h-2 bg-amber-500 inline-block rounded-full mr-1"></span>ppGpp</span>
+                            <span><span class="w-2 h-2 bg-purple-400 inline-block rounded-full mr-1"></span>Plasmid</span>
+                            <span><span class="w-2 h-2 bg-orange-500 inline-block rounded-full mr-1"></span>Efflux Pump</span>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="card p-4">
-                            <h4 class="text-xs font-bold text-clinical-dark mb-2">Kinetic Threshold (Vin vs Clearance)</h4>
-                            <canvas id="kineticsChart" height="150"></canvas>
+                        <div class="card p-3">
+                            <h4 class="text-[11px] font-bold text-[#003366] dark:text-blue-300">Kinetics: V<sub>in</sub> vs Clearance Threshold</h4>
+                            <div class="chart-container-sm"><canvas id="kineticsChart"></canvas></div>
                         </div>
-                        <div class="card p-4">
-                            <h4 class="text-xs font-bold text-danger mb-2">Population Dynamics</h4>
-                            <canvas id="populationChart" height="150"></canvas>
+                        <div class="card p-3">
+                            <h4 class="text-[11px] font-bold text-[#D9534F] dark:text-red-300">Population Dynamics</h4>
+                            <div class="chart-container-sm"><canvas id="populationChart"></canvas></div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-4">
+                    <i class="fas fa-calculator text-[#D9534F] mr-2"></i>Model Logic: Core Variables & Math
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><span class="text-xs font-bold">Glutamine</span></div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">Controls <strong>OmpF porin opening</strong>. High = open → drug enters; Low = closed → excluded.</p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span><span class="text-xs font-bold">Starvation / ppGpp</span></div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">Triggers <strong>cryptic gene activation</strong> and PCN amplification (3×–89×).</p>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1"><span class="w-3 h-3 rounded-full bg-blue-500"></span><span class="text-xs font-bold">Antibiotic Dosage</span></div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">Drug concentration (µg/mL). High = more influx (V<sub>in</sub>).</p>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-900/20 dark:to-emerald-900/20 p-4 rounded-lg text-center">
+                    <p class="text-xs font-bold text-[#003366] dark:text-blue-300">The Core Equation — At MIC:</p>
+                    <p class="text-2xl font-mono font-bold text-[#003366] dark:text-blue-300 py-2">V<sub>in</sub> &gt; 4(V<sub>e</sub> + V<sub>h</sub>)</p>
+                    <div class="grid grid-cols-3 gap-3 mt-2 text-[0.65rem]">
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-2 rounded"><strong>V<sub>in</sub></strong><br>Influx velocity</div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-2 rounded"><strong>V<sub>e</sub></strong><br>Efflux rate</div>
+                        <div class="bg-white/50 dark:bg-slate-800/50 p-2 rounded"><strong>V<sub>h</sub></strong><br>Degradation rate</div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- MECHANISMS TAB -->
-        <section id="sec-mechanisms" class="hidden space-y-6">
+        <!-- ============ MECHANISMS ============ -->
+        <section id="sec-mechanisms" class="hidden space-y-6 fade-in-up">
             <div class="card p-6">
-                <h2 class="text-lg font-bold text-clinical-dark mb-4">The Two-Mechanism Model</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="border-l-4 border-blue-500 pl-4 py-2">
-                        <h3 class="font-bold text-blue-700">Mechanism 1: Nutrient-Driven Permeability</h3>
-                        <p class="text-sm text-gray-600 mt-2">Glutamine depletion triggers the CpxA/CpxR stress response, downregulating OmpF porins. This structural adaptation closes the primary channel for antibiotic influx (Vin), conferring functional resistance without genetic mutation.</p>
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-dna text-[#D9534F] mr-2"></i>The Two-Mechanism Model</h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">Gram-negative bacteria orchestrate a synchronized defense strategy inside the human host. Mechanism 1 regulates membrane permeability; Mechanism 2 regulates enzymatic degradation and efflux through epigenetic derepression.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6 space-y-4 border-t-4 border-t-[#003366]">
+                    <div class="flex items-center justify-between"><span class="bg-blue-100 dark:bg-blue-900/40 text-[#003366] dark:text-blue-300 text-xs font-bold px-3 py-1 rounded-full uppercase"><i class="fas fa-door-open mr-1"></i>Mechanism 1</span></div>
+                    <h3 class="text-lg font-bold text-[#0F2C59] dark:text-blue-300">Nutrient-Driven Porin Gating</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Outer membrane permeability is governed by environmental glutamine availability.</p>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                        <div class="text-xs font-bold text-slate-500 uppercase mb-1">Signaling Cascade</div>
+                        <div class="font-mono text-xs text-[#003366] dark:text-blue-300">Glutamine → Inosine → CpxA-P → OmpR → OmpF ↑</div>
                     </div>
-                    <div class="border-l-4 border-danger pl-4 py-2">
-                        <h3 class="font-bold text-danger">Mechanism 2: Starvation-Induced Gene Dosage</h3>
-                        <p class="text-sm text-gray-600 mt-2">Host starvation activates the ppGpp alarmone. This cascade derepresses silent resistance determinants (e.g., tetA, aadA) and drives plasmid copy number (PCN) amplification up to 89-fold, neutralizing internalized drugs.</p>
-                    </div>
+                    <ul class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong>High Glutamine (Lab):</strong> OmpF open → V<sub>in</sub> exceeds clearance → cell death (artificial susceptibility).</li>
+                        <li><strong>Low Glutamine (Host):</strong> OmpF closed → V<sub>in</sub> drops below threshold → survival.</li>
+                    </ul>
                 </div>
-                <div class="mt-6 bg-gray-50 p-4 rounded border text-center">
-                    <p class="font-mono text-lg font-bold text-clinical-dark">Vin > 4(Ve + Vh)</p>
-                    <p class="text-xs text-gray-500 mt-1">The therapeutic drug velocity threshold at MIC</p>
+
+                <div class="card p-6 space-y-4 border-t-4 border-t-[#D9534F]">
+                    <div class="flex items-center justify-between"><span class="bg-red-100 dark:bg-red-900/40 text-[#D9534F] dark:text-red-300 text-xs font-bold px-3 py-1 rounded-full uppercase"><i class="fas fa-dna mr-1"></i>Mechanism 2</span></div>
+                    <h3 class="text-lg font-bold text-[#0F2C59] dark:text-blue-300">Cryptic Gene Derepression & PCN Dynamics</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">H-NS proteins silence cryptic resistance genes under lab conditions. Host starvation triggers derepression.</p>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                        <div class="text-xs font-bold text-slate-500 uppercase mb-1">Epigenetic Unlocking</div>
+                        <div class="font-mono text-xs text-[#D9534F] dark:text-red-300">Starvation → ppGpp ↑ → H-NS dissociation → PCN amplification</div>
+                    </div>
+                    <ul class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                        <li><strong>Alarmone Signaling:</strong> ppGpp accumulation initiates stringent response.</li>
+                        <li><strong>PCN Escalation:</strong> Plasmid replication multiplies gene dosage (<em>tetA</em>, <em>aadA</em>), neutralizing internalized drugs.</li>
+                    </ul>
                 </div>
             </div>
         </section>
 
-        <!-- REFERENCES TAB -->
-        <section id="sec-references" class="hidden space-y-6">
+        <!-- ============ TRANSLATIONAL ROADMAP ============ -->
+        <section id="sec-roadmap" class="hidden space-y-6 fade-in-up">
             <div class="card p-6">
-                <h2 class="text-lg font-bold text-clinical-dark mb-4">Methodology & References</h2>
-                <p class="text-sm text-gray-600 mb-4">This prototype instantiates the three-module MAST architecture using HTML5, Tailwind CSS, and Chart.js. The mathematical logic is based on the following foundational literature:</p>
-                <ul class="space-y-3 text-sm">
-                    <li class="p-3 bg-gray-50 rounded border"><strong>[1]</strong> Ahmad, M., et al. (2025). The role of bacterial metabolism in antimicrobial resistance. <em>Nature Reviews Microbiology</em>.</li>
-                    <li class="p-3 bg-gray-50 rounded border"><strong>[2]</strong> Belanger, C.R., Hancock, R.E.W. (2021). Testing physiologically relevant conditions in minimal inhibitory concentration assays. <em>Nat Protoc</em>, 16, 3761–3774.</li>
-                    <li class="p-3 bg-gray-50 rounded border"><strong>[3]</strong> Batchelor E, Walthers D, Kenney LJ, Goulian M (2005). The Escherichia coli CpxA-CpxR Envelope Stress Response System Regulates Expression of the Porins OmpF and OmpC. <em>J Bacteriol</em>, 187.</li>
-                    <li class="p-3 bg-gray-50 rounded border"><strong>[4]</strong> Wang, H., & Joffré, E. (2025). Plasmid copy number as a modulator in bacterial pathogenesis and antibiotic resistance. <em>npj Antimicrobials and Resistance</em>.</li>
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2">
+                    <i class="fas fa-road text-[#2E7D32] mr-2"></i>Translational Roadmap: From MAST to Clinical Deployment
+                </h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                    The MAST architecture is a design-phase artifact. Below is the three-tier validation roadmap outlined in Section 4 of the manuscript. These pathways are <strong>complementary</strong> — each addresses a different layer of the diagnostic void, moving from computational feasibility to clinical efficacy.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="card p-5">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-[#2E7D32] flex items-center justify-center font-bold text-lg">1</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">In Silico (Current)</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">Curate multi-omic datasets (NCBI, BV-BRC); implement COBRApy GEMs; train supervised classifiers; validate via stratified cross-validation.</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-[#2E7D32] font-semibold"><i class="fas fa-check-circle mr-1"></i>Feasible now (0 wet-lab cost)</div>
+                </div>
+                <div class="card p-5">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-[#003366] flex items-center justify-center font-bold text-lg">2</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">In Vitro (Tier 2)</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">Validate Module 2 against host-mimicking media (RPMI 1640, synthetic gut fluid) and single-cell microfluidics.</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-[#003366] font-semibold"><i class="fas fa-flask mr-1"></i>Validation phase</div>
+                </div>
+                <div class="card p-5">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-700 flex items-center justify-center font-bold text-lg">3</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">Clinical (Tier 3)</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">IRB-approved retrospective cohorts; EHR integration (HL7 FHIR); cognitive walkthrough with clinicians for alert-fatigue assessment.</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-purple-700 font-semibold"><i class="fas fa-hospital mr-1"></i>Deployment phase</div>
+                </div>
+                <div class="card p-5">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 flex items-center justify-center font-bold text-lg">4</div>
+                    <h3 class="font-bold text-[#0F2C59] dark:text-blue-300 mt-3">Reproducibility</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-2">Code, curated features, and ML pipeline released on GitHub upon publication; open-source license (CC-BY).</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 text-xs text-indigo-700 font-semibold"><i class="fas fa-code mr-1"></i>Open artifact</div>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="text-base font-bold text-[#0F2C59] dark:text-blue-300 mb-4"><i class="fas fa-table mr-2 text-[#D9534F]"></i>Diagnostic Platform Performance Matrix</h3>
+                <div class="overflow-x-auto">
+                    <table class="matrix-table">
+                        <thead><tr><th>Platform</th><th>Nutrient Context</th><th>OmpF State</th><th>PCN</th><th>Clinical Accuracy</th></tr></thead>
+                        <tbody>
+                            <tr><td class="font-semibold">Mueller-Hinton (AST)</td><td class="text-red-600">Hyper-nutritious</td><td>Open (100%)</td><td>Baseline (1×)</td><td class="font-bold text-red-600">POOR</td></tr>
+                            <tr class="bg-emerald-50/40 dark:bg-emerald-900/10"><td class="font-semibold text-[#2E7D32]">HMDM</td><td class="text-[#2E7D32]">Physiological</td><td>Closed/Gated</td><td>Amplified (3×–89×)</td><td class="font-bold text-[#2E7D32]">HIGH (95%+)</td></tr>
+                            <tr><td class="font-semibold text-[#003366]">Bio-MEMS</td><td>Dynamic</td><td>Real-time</td><td>Kinetic</td><td class="font-bold text-[#003366]">VERY HIGH</td></tr>
+                            <tr class="bg-indigo-50/40 dark:bg-indigo-900/10"><td class="font-semibold text-indigo-700">Computational Flux (MAST)</td><td class="text-indigo-700">Virtual / Patient-Specific</td><td>Simulated</td><td>Modeled</td><td class="font-bold text-indigo-700">PREDICTIVE</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ REFERENCES ============ -->
+        <section id="sec-references" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-book text-[#003366] mr-2"></i>Foundational References</h2>
+                <p class="text-slate-600 dark:text-slate-400 text-sm">The mathematical logic and mechanistic assertions instantiated in this prototype are grounded in the following peer-reviewed literature (full citation list appears in the manuscript References section).</p>
+            </div>
+            <div class="card p-6">
+                <ul class="space-y-4 text-sm">
+                    <li class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-[#0F2C59] dark:text-blue-300">[1] Ahmad, M., et al. (2025).</span>
+                        <em>The role of bacterial metabolism in antimicrobial resistance.</em> Nature Reviews Microbiology.
+                        <div class="text-xs text-slate-500 mt-1">Supports: metabolic state as a driver of resistance phenotypes.</div>
+                    </li>
+                    <li class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-[#0F2C59] dark:text-blue-300">[2] Belanger, C.R., Hancock, R.E.W. (2021).</span>
+                        <em>Testing physiologically relevant conditions in minimal inhibitory concentration assays.</em> Nat Protoc, 16, 3761–3774.
+                        <div class="text-xs text-slate-500 mt-1">Supports: host-mimicking media as a validation pathway.</div>
+                    </li>
+                    <li class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-[#0F2C59] dark:text-blue-300">[3] Batchelor, E., et al. (2005).</span>
+                        <em>The Escherichia coli CpxA-CpxR envelope stress response system regulates expression of the porins OmpF and OmpC.</em> J Bacteriol, 187.
+                        <div class="text-xs text-slate-500 mt-1">Supports: Mechanism 1 (OmpF regulation via CpxA/R).</div>
+                    </li>
+                    <li class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-[#0F2C59] dark:text-blue-300">[4] Wang, H., Joffré, E. (2025).</span>
+                        <em>Plasmid copy number as a modulator in bacterial pathogenesis and antibiotic resistance.</em> npj Antimicrobials and Resistance.
+                        <div class="text-xs text-slate-500 mt-1">Supports: Mechanism 2 (PCN amplification).</div>
+                    </li>
+                    <li class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span class="font-bold text-[#0F2C59] dark:text-blue-300">[5] Deekshit, V.K., Srikumar, S. (2022).</span>
+                        <em>"To be, or not to be"—The dilemma of "silent" antimicrobial resistance genes in bacteria.</em> J Appl Microbiol, 133(5), 2902–2914.
+                        <div class="text-xs text-slate-500 mt-1">Supports: H-NS silencing and cryptic gene derepression.</div>
+                    </li>
                 </ul>
+            </div>
+        </section>
+
+        <!-- ============ ABSTRACT & CONTRIBUTIONS ============ -->
+        <section id="sec-authors" class="hidden space-y-6 fade-in-up">
+            <div class="card p-6 space-y-4">
+                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300"><i class="fas fa-file-alt text-[#D9534F] mr-2"></i>Project Abstract</h2>
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p class="text-sm font-bold text-[#0F2C59] dark:text-blue-300">Metabolism-Aware Susceptibility Testing Framework for Next-Generation Clinical Decision Support in Antimicrobial Resistance</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1"><strong>Authors:</strong> Muhammad Tasnimul Hasan*, Mahfuza Siddika Khan</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400"><strong>Affiliation:</strong> Department of Computer Science & Engineering, Manarat International University, Bangladesh</p>
+                    <p class="text-xs text-slate-600 dark:text-slate-400"><strong>Corresponding Author:</strong> muhammadtasnimulhasan01@gmail.com</p>
+                </div>
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                    Antimicrobial resistance is a critical threat to the UN Sustainable Development Goals, disproportionately impacting low-resource settings such as Bangladesh. Standard antimicrobial susceptibility testing (AST) is performed under highly controlled laboratory conditions that fail to replicate the host's metabolic microenvironment. This mismatch creates a "metabolic blind spot," producing systematic false susceptibility profiles that lead to <em>in vivo</em> treatment failure. We propose Metabolism-Aware Susceptibility Testing (MAST), a computational framework that examines how infection-relevant metabolic conditions influence susceptibility interpretation. The MAST architecture links host-relevant nutrient availability with bacterial resistance mechanisms, including CpxA/CpxR-associated regulation of OmpF permeability and ppGpp-mediated stringent responses. The framework comprises three interconnected modules: (1) metabolic feature curation from public repositories; (2) genome-scale metabolic state modeling; and (3) supervised machine learning classification of conditional resistance phenotypes. We instantiate the framework as an interactive web-based prototype. As a design-phase artifact, this paper presents the architectural foundation and a rigorous, testable evaluation protocol.
+                </p>
+                <div class="flex flex-wrap gap-1 pt-3 border-t border-slate-200 dark:border-slate-700">
+                    <span class="keyword-tag">Antimicrobial Resistance</span>
+                    <span class="keyword-tag">Metabolic State</span>
+                    <span class="keyword-tag">OmpF Porin</span>
+                    <span class="keyword-tag">Clinical Decision Support</span>
+                    <span class="keyword-tag">Machine Learning</span>
+                    <span class="keyword-tag">Genome-Scale Modeling</span>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-[#0F2C59] dark:text-blue-300 mb-4"><i class="fas fa-user-graduate text-[#003366] mr-2"></i>Author Contributions (CRediT)</h3>
+                <table class="w-full text-sm border-collapse">
+                    <thead><tr>
+                        <th class="text-left p-3 bg-slate-50 dark:bg-slate-800 font-bold text-[#0F2C59] dark:text-blue-300 border-b-2 border-slate-200 dark:border-slate-700">Author</th>
+                        <th class="text-left p-3 bg-slate-50 dark:bg-slate-800 font-bold text-[#0F2C59] dark:text-blue-300 border-b-2 border-slate-200 dark:border-slate-700">Roles</th>
+                    </tr></thead>
+                    <tbody>
+                        <tr class="border-b border-slate-100 dark:border-slate-700">
+                            <td class="p-3 font-semibold text-[#0F2C59] dark:text-blue-300">Hasan, M.T.*</td>
+                            <td class="p-3 text-xs text-slate-600 dark:text-slate-400">Conceptualization · Methodology · Software design · Kinetic modeling · Prototype development · Writing — original draft · Visualization</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-semibold text-[#0F2C59] dark:text-blue-300">Khan, M.S.</td>
+                            <td class="p-3 text-xs text-slate-600 dark:text-slate-400">Clinical validation · Conceptual review · Writing — review & editing · Formal analysis</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="mt-4 text-xs text-slate-400 dark:text-slate-500"><i class="fas fa-asterisk text-[#D9534F] mr-1"></i>Corresponding author</div>
             </div>
         </section>
 
     </main>
 
-    <footer class="bg-white border-t py-4 text-center text-xs text-gray-500">
-        MAST Framework Clinical Prototype v1.0 | Supplementary File 1 for JOMS Submission | Open-Source Artifact
+    <footer class="bg-[#0F2C59] text-white py-4 text-center text-xs">
+        <div class="max-w-7xl mx-auto px-4 space-y-1">
+            <p class="font-semibold"><i class="fas fa-flask mr-1"></i>MAST Framework Clinical Prototype v1.0 | Supplementary File 1</p>
+            <p class="text-blue-300"><i class="fas fa-university mr-1"></i>Department of Computer Science & Engineering · Manarat International University, Bangladesh</p>
+            <p class="text-blue-400 text-[0.6rem]"><i class="fas fa-code mr-1"></i>Open-source artifact distributed under CC-BY 4.0 · Source code available upon publication</p>
+        </div>
     </footer>
 
     <script>
-        // TAB SWITCHING
-        function switchTab(tabId) {
-            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById('sec-' + tabId).classList.remove('hidden');
-            document.getElementById('tab-' + tabId).classList.add('active');
+        // ============ CORE STATE ============
+        let comparisonMode = false;
+        let simHistory = [];
+        let kinChart = null, popChart = null;
+        let animFrame = null;
 
-            if (tabId === 'simulator') {
-                if (!window.chartsInitialized) {
-                    initCharts();
-                    window.chartsInitialized = true;
-                }
+        // ============ TAB SWITCHING ============
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(s => {
+                s.classList.add('hidden');
+                s.classList.remove('visible');
+            });
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            const target = document.getElementById('sec-' + tabId);
+            const btn = document.getElementById('tab-' + tabId);
+            if (target) {
+                target.classList.remove('hidden');
+                // Force visible to fix opacity bug
+                requestAnimationFrame(() => target.classList.add('visible'));
+            }
+            if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected', 'true'); }
+
+            if (tabId === 'simulator' && !kinChart) {
+                initKinChart();
+                initPopChart();
                 updateSimulation();
+            }
+            if (tabId === 'simulator') {
+                if (kinChart) kinChart.resize();
+                if (popChart) popChart.resize();
+                drawCanvas();
             }
         }
 
-        // CHART INITIALIZATION
-        let kinChart, popChart;
+        // ============ PRESETS ============
+        function setScenario(g, s, a) {
+            document.getElementById('input-glutamine').value = g;
+            document.getElementById('input-starvation').value = s;
+            document.getElementById('input-antibiotic').value = a;
+            updateSimulation();
+        }
+        function resetSimulation() { setScenario(80, 15, 50); }
 
-        function initCharts() {
-            // Kinetics Chart
-            const ctxKin = document.getElementById('kineticsChart').getContext('2d');
-            kinChart = new Chart(ctxKin, {
+        // ============ CHART INITIALIZATION ============
+        function initKinChart() {
+            const ctx = document.getElementById('kineticsChart').getContext('2d');
+            kinChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%'],
+                    labels: ['0%','10%','20%','30%','40%','50%','60%','70%','80%','90%','100%'],
                     datasets: [
-                        { label: 'Drug Influx (Vin)', data: [], borderColor: '#0F2C59', backgroundColor: 'rgba(15,44,89,0.1)', fill: true, tension: 0.3 },
-                        { label: 'Clearance Threshold', data: [], borderColor: '#D9534F', borderDash: [5, 5], pointRadius: 0 }
+                        { label: 'Drug Influx (Vin)', data: [], borderColor: '#003366',
+                          backgroundColor: 'rgba(0,51,102,0.1)', fill: true, tension: 0.3, pointRadius: 2 },
+                        { label: 'Clearance Threshold', data: [], borderColor: '#D9534F',
+                          borderDash: [5,5], pointRadius: 0, borderWidth: 2 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 100 }, x: { title: { display: true, text: 'Glutamine Concentration (%)', font: {size: 10} } } } }
-            });
-
-            // Population Chart
-            const ctxPop = document.getElementById('populationChart').getContext('2d');
-            popChart = new Chart(ctxPop, {
-                type: 'line',
-                data: {
-                    labels: ['0h', '1h', '2h', '3h', '4h', '5h', '6h'],
-                    datasets: [{ label: 'Bacterial Survival', data: [], borderColor: '#D9534F', backgroundColor: 'rgba(217,83,79,0.1)', fill: true, tension: 0.4, pointRadius: 0 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 120 }, x: { title: { display: true, text: 'Time (Hours)', font: {size: 10} } } } }
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: true, labels: { font: { size: 9 } } } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Rate (a.u.)', font: { size: 9 } } },
+                        x: { title: { display: true, text: 'Glutamine Concentration (%)', font: { size: 9 } }, grid: { display: false } }
+                    }
+                }
             });
         }
 
-        // SIMULATION LOGIC
+        function initPopChart() {
+            const ctx = document.getElementById('populationChart').getContext('2d');
+            popChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['0h','1h','2h','3h','4h','5h','6h'],
+                    datasets: [{ label: 'Bacterial Survival (Log CFU)', data: [], borderColor: '#D9534F',
+                                  backgroundColor: 'rgba(217,83,79,0.1)', fill: true, tension: 0.4, pointRadius: 0 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 120, title: { display: true, text: 'Log CFU/mL', font: { size: 9 } } },
+                        x: { title: { display: true, text: 'Time (hours)', font: { size: 9 } }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // ============ SIMULATION LOGIC ============
         function updateSimulation() {
             const g = parseInt(document.getElementById('input-glutamine').value);
             const s = parseInt(document.getElementById('input-starvation').value);
             const a = parseInt(document.getElementById('input-antibiotic').value);
 
-            // Update UI Labels
             document.getElementById('val-glutamine').innerText = g + '%';
             document.getElementById('val-starvation').innerText = s + '%';
             document.getElementById('val-antibiotic').innerText = a;
@@ -246,122 +767,282 @@
             const pcn = (1 + (s / 100) * 7).toFixed(1);
             const killing = vin > thresh;
 
-            // Update Status Panel
+            // Status panel
             const porinEl = document.getElementById('status-porin');
-            if (g > 60) { porinEl.innerText = 'OPEN'; porinEl.className = 'font-bold text-success'; }
-            else if (g > 30) { porinEl.innerText = 'GATED'; porinEl.className = 'font-bold text-amber-500'; }
-            else { porinEl.innerText = 'CLOSED'; porinEl.className = 'font-bold text-danger'; }
+            if (g > 60) { porinEl.innerText = 'OPEN'; porinEl.className = 'font-bold text-[#2E7D32]'; }
+            else if (g > 30) { porinEl.innerText = 'GATED'; porinEl.className = 'font-bold text-amber-600'; }
+            else { porinEl.innerText = 'CLOSED'; porinEl.className = 'font-bold text-[#D9534F]'; }
 
             document.getElementById('status-pcn').innerText = pcn + 'x';
-            
+            document.getElementById('status-vin').innerText = vin > 40 ? 'High' : 'Low';
+
             const mastEl = document.getElementById('status-mast');
             if (killing) {
                 mastEl.innerText = 'LOW RISK';
-                mastEl.className = 'font-bold text-success';
+                mastEl.className = 'font-bold px-2 py-0.5 rounded text-white bg-[#2E7D32] text-[11px]';
             } else {
                 mastEl.innerText = 'HIGH RISK (False Susceptibility)';
-                mastEl.className = 'font-bold text-danger';
+                mastEl.className = 'font-bold px-2 py-0.5 rounded text-white bg-[#D9534F] text-[11px]';
             }
 
-            // Update Efficacy Bar
+            // Efficacy bar
             const eff = Math.min(100, Math.round((vin / thresh) * 100));
             document.getElementById('efficacy-label').innerText = eff + '%';
             const bar = document.getElementById('efficacy-bar');
             bar.style.width = eff + '%';
-            bar.className = 'efficacy-bar h-3 rounded-full ' + (eff > 70 ? 'bg-success' : eff > 40 ? 'bg-amber-500' : 'bg-danger');
+            bar.className = 'efficacy-bar h-full rounded-full ' +
+                (eff > 70 ? 'bg-[#2E7D32]' : eff > 40 ? 'bg-amber-500' : 'bg-[#D9534F]');
 
-            // Update Charts
-            if (kinChart && popChart) {
-                const labValues = [0,10,20,30,40,50,60,70,80,90,100];
-                kinChart.data.datasets[0].data = labValues.map(v => (v / 100) * a);
-                kinChart.data.datasets[1].data = labValues.map(() => thresh);
+            // Charts
+            if (kinChart) {
+                const labs = [0,10,20,30,40,50,60,70,80,90,100];
+                kinChart.data.datasets[0].data = labs.map(v => ((v/100) * a).toFixed(1));
+                kinChart.data.datasets[1].data = labs.map(() => thresh.toFixed(1));
                 kinChart.update('none');
-
-                const popData = [];
-                let pop = 100;
+            }
+            if (popChart) {
+                const pd = []; let pop = 100;
                 const slope = killing ? -15 : 5;
-                for (let i = 0; i < 7; i++) { pop = Math.max(0, pop + slope); popData.push(pop); }
-                popChart.data.datasets[0].data = popData;
+                for (let i = 0; i < 7; i++) { pop = Math.max(0, pop + slope); pd.push(pop); }
+                popChart.data.datasets[0].data = pd;
                 popChart.update('none');
             }
 
-            // Draw Canvas
+            logHistory(g, s, a, eff, killing ? 'Kill' : 'Survive');
             drawCell(g, s);
         }
 
-        // CANVAS DRAWING (Bacterial Cross-Section)
+        // ============ CANVAS RENDERING ============
         const canvas = document.getElementById('cellCanvas');
         const ctx = canvas.getContext('2d');
 
         function drawCell(g, s) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+            const w = canvas.width, h = canvas.height;
+
             // Backgrounds
-            ctx.fillStyle = '#1E293B'; ctx.fillRect(0, 0, canvas.width, 70); // Extracellular
-            ctx.fillStyle = '#334155'; ctx.fillRect(0, 70, canvas.width, 10); // Outer Membrane
-            ctx.fillStyle = '#0F172A'; ctx.fillRect(0, 80, canvas.width, canvas.height - 80); // Cytoplasm
+            ctx.fillStyle = '#0F172A'; ctx.fillRect(0, 0, w, 70);       // Extracellular
+            ctx.fillStyle = '#334155'; ctx.fillRect(0, 70, w, 10);      // Outer membrane
+            ctx.fillStyle = '#0B1120'; ctx.fillRect(0, 80, w, h - 80);  // Cytoplasm
 
             // Labels
             ctx.fillStyle = '#94A3B8'; ctx.font = '10px monospace';
-            ctx.fillText('EXTRACELLULAR SPACE', 15, 20);
+            ctx.fillText('EXTRACELLULAR', 15, 20);
             ctx.fillText('PERIPLASM', 15, 95);
 
-            // Draw OmpF Porins (Mechanism 1)
-            const porinCount = 5; const spacing = canvas.width / (porinCount + 1);
+            // OmpF Porins (Mechanism 1)
+            const porinCount = 5; const spacing = w / (porinCount + 1);
             for (let i = 1; i <= porinCount; i++) {
                 const x = i * spacing;
-                ctx.fillStyle = g > 40 ? '#10B981' : '#EF4444'; // Green = Open, Red = Closed
+                ctx.fillStyle = g > 40 ? '#10B981' : '#EF4444';
                 ctx.fillRect(x - 10, 70, 20, 10);
             }
 
-            // Draw Efflux Pumps (Mechanism 2)
+            // Efflux Pumps (Mechanism 2)
             if (s > 50) {
-                ctx.fillStyle = '#F97316'; // Orange
+                ctx.fillStyle = '#F97316';
                 for (let i = 1; i <= 3; i++) {
-                    const x = i * (canvas.width / 4);
-                    ctx.beginPath(); ctx.moveTo(x - 10, 80); ctx.lineTo(x, 60); ctx.lineTo(x + 10, 80); ctx.fill();
+                    const x = i * (w / 4);
+                    ctx.beginPath(); ctx.moveTo(x - 10, 80); ctx.lineTo(x, 55); ctx.lineTo(x + 10, 80); ctx.fill();
                 }
             }
 
-            // Draw Plasmids (Mechanism 2)
+            // Plasmids (Mechanism 2)
             const pcn = Math.floor(1 + (s / 100) * 6);
             ctx.strokeStyle = '#C084FC'; ctx.lineWidth = 2;
             for (let i = 0; i < pcn; i++) {
                 ctx.beginPath();
-                ctx.ellipse(canvas.width/2 + (i%3)*80 - 80, 150 + Math.floor(i/3)*50, 15, 8, 0, 0, Math.PI*2);
+                ctx.ellipse(w/2 + (i%3)*80 - 80, 150 + Math.floor(i/3)*50, 15, 8, 0, 0, Math.PI*2);
                 ctx.stroke();
+            }
+
+            // Legend text
+            ctx.fillStyle = '#E2E8F0'; ctx.font = '10px sans-serif';
+            ctx.fillText('Mechanism 1: ' + (g > 40 ? 'OPEN' : 'CLOSED'), w - 180, 25);
+            ctx.fillText('Mechanism 2 PCN: ' + pcn + 'x', w - 180, 42);
+        }
+
+        function drawCanvas() {
+            const g = parseInt(document.getElementById('input-glutamine').value);
+            const s = parseInt(document.getElementById('input-starvation').value);
+            drawCell(g, s);
+        }
+
+        // ============ COMPARISON ============
+        function toggleComparisonMode() {
+            comparisonMode = !comparisonMode;
+            const overlay = document.getElementById('compareOverlay');
+            const mainCanvas = document.getElementById('cellCanvas');
+            const btn = document.getElementById('compareBtn');
+            if (comparisonMode) {
+                overlay.classList.remove('hidden');
+                mainCanvas.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-flask mr-1"></i>Exit Comparison';
+                const lc = document.getElementById('compareLabCanvas');
+                const hc = document.getElementById('compareHostCanvas');
+                if (lc && hc) {
+                    const lctx = lc.getContext('2d');
+                    const hctx = hc.getContext('2d');
+                    // Quick inline rendering for comparison (simplified)
+                    drawSimpleCell(lctx, 80, 15, 350);
+                    drawSimpleCell(hctx, 15, 75, 350);
+                }
+            } else {
+                overlay.classList.add('hidden');
+                mainCanvas.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-flask mr-1"></i>Compare Lab vs Host';
+                drawCanvas();
             }
         }
 
-        // EXPORT CSV
+        function drawSimpleCell(c, g, s, w) {
+            const h = 300;
+            c.clearRect(0, 0, w, h);
+            c.fillStyle = '#0F172A'; c.fillRect(0, 0, w, 70);
+            c.fillStyle = '#334155'; c.fillRect(0, 70, w, 10);
+            c.fillStyle = '#0B1120'; c.fillRect(0, 80, w, h - 80);
+            // Porins
+            for (let i = 1; i <= 5; i++) {
+                const x = i * (w / 6);
+                c.fillStyle = g > 40 ? '#10B981' : '#EF4444';
+                c.fillRect(x - 8, 70, 16, 10);
+            }
+            // Plasmids
+            const pcn = Math.floor(1 + (s / 100) * 6);
+            c.strokeStyle = '#C084FC'; c.lineWidth = 2;
+            for (let i = 0; i < pcn; i++) {
+                c.beginPath();
+                c.ellipse(w/2 + (i%3)*60 - 60, 150 + Math.floor(i/3)*50, 12, 7, 0, 0, Math.PI*2);
+                c.stroke();
+            }
+            c.fillStyle = '#E2E8F0'; c.font = '10px sans-serif';
+            c.fillText('Gln: ' + g + '% | Starv: ' + s + '%', 10, 20);
+        }
+
+        // ============ HISTORY ============
+        function logHistory(g, s, a, eff, out) {
+            const exists = simHistory.length > 0 &&
+                simHistory[simHistory.length-1].g === g &&
+                simHistory[simHistory.length-1].s === s &&
+                simHistory[simHistory.length-1].a === a;
+            if (exists) return;
+            simHistory.push({ g, s, a, eff, out });
+            document.getElementById('historyCount').innerText = simHistory.length;
+            if (simHistory.length === 1) {
+                document.getElementById('historyPanel').classList.remove('hidden');
+            }
+        }
+
+        function clearHistory() {
+            simHistory = [];
+            document.getElementById('historyCount').innerText = '0';
+            document.getElementById('historyPanel').classList.add('hidden');
+        }
+
+        // ============ EXPORT CSV ============
         function exportCSV() {
             const g = document.getElementById('input-glutamine').value;
             const s = document.getElementById('input-starvation').value;
             const a = document.getElementById('input-antibiotic').value;
             const eff = document.getElementById('efficacy-label').innerText;
-            
-            const csvContent = "data:text/csv;charset=utf-8," 
-                + "Parameter,Value\n"
-                + "Glutamine (%)," + g + "\n"
-                + "Starvation (%)," + s + "\n"
-                + "Antibiotic Dosage (ug/mL)," + a + "\n"
-                + "Predicted Clinical Efficacy," + eff;
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "MAST_Simulation_Data.csv");
-            document.body.appendChild(link);
+            const mast = document.getElementById('status-mast').innerText;
+
+            let csv = 'MAST Simulation Export\n';
+            csv += 'Parameter,Value\n';
+            csv += `Glutamine (%),${g}\n`;
+            csv += `Starvation (%),${s}\n`;
+            csv += `Antibiotic Dosage (ug/mL),${a}\n`;
+            csv += `Predicted Clinical Efficacy,${eff}\n`;
+            csv += `MAST Risk Score,"${mast}"\n\n`;
+            if (simHistory.length > 0) {
+                csv += 'History Log\n';
+                csv += 'Glutamine (%),Starvation (%),Antibiotic (ug/mL),Efficacy (%),Outcome\n';
+                simHistory.forEach(h => {
+                    csv += `${h.g},${h.s},${h.a},${h.eff},${h.out}\n`;
+                });
+            }
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'MAST_Simulation_Data.csv';
             link.click();
-            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
-        // INIT
-        window.onload = () => {
-            initCharts();
-            updateSimulation();
-            window.chartsInitialized = true;
-        };
+        // ============ SHARE URL ============
+        function shareSimulation() {
+            const g = document.getElementById('input-glutamine').value;
+            const s = document.getElementById('input-starvation').value;
+            const a = document.getElementById('input-antibiotic').value;
+            const url = location.origin + location.pathname + '#sim=' + g + ',' + s + ',' + a;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('URL copied to clipboard:\n' + url);
+                }).catch(() => prompt('Copy this URL:', url));
+            } else {
+                prompt('Copy this URL:', url);
+            }
+        }
+
+        function parseUrlHash() {
+            const h = location.hash.slice(1);
+            if (!h.startsWith('sim=')) return;
+            const parts = h.slice(4).split(',');
+            if (parts.length === 3) {
+                const g = parseInt(parts[0]), s = parseInt(parts[1]), a = parseInt(parts[2]);
+                if (!isNaN(g) && !isNaN(s) && !isNaN(a)) {
+                    document.getElementById('input-glutamine').value = Math.max(0, Math.min(100, g));
+                    document.getElementById('input-starvation').value = Math.max(0, Math.min(100, s));
+                    document.getElementById('input-antibiotic').value = Math.max(10, Math.min(100, a));
+                    updateSimulation();
+                }
+            }
+        }
+
+        // ============ DARK MODE ============
+        document.getElementById('darkModeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('moonIcon').classList.toggle('hidden');
+            document.getElementById('sunIcon').classList.toggle('hidden');
+
+            // Safe chart theme update
+            [kinChart, popChart].forEach(ch => {
+                if (!ch || !ch.options) return;
+                const tc = isDark ? '#CBD5E1' : '#475569';
+                const gc = isDark ? '#334155' : '#E2E8F0';
+                if (ch.options.plugins && ch.options.plugins.legend && ch.options.plugins.legend.labels) {
+                    ch.options.plugins.legend.labels.color = tc;
+                }
+                if (ch.options.scales && ch.options.scales.x && ch.options.scales.x.ticks) {
+                    ch.options.scales.x.ticks.color = tc;
+                }
+                if (ch.options.scales && ch.options.scales.y) {
+                    if (ch.options.scales.y.ticks) ch.options.scales.y.ticks.color = tc;
+                    if (ch.options.scales.y.grid) ch.options.scales.y.grid.color = gc;
+                }
+                ch.update('none');
+            });
+        });
+
+        // ============ INIT ============
+        window.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('moonIcon').classList.remove('hidden');
+                document.getElementById('sunIcon').classList.add('hidden');
+            }
+
+            // Initialize canvas
+            drawCanvas();
+
+            // Parse URL parameters
+            parseUrlHash();
+        });
     </script>
 </body>
 </html>
