@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAST Framework Dashboard | Supplementary File 1</title>
+    <title>MAST Framework Dashboard V2 | Supplementary File 1</title>
     <!-- Chart.js for Publication-Grade Data Viz -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Tailwind for Layout -->
@@ -35,6 +35,10 @@
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #0F2C59; cursor: pointer; margin-top: -7px; box-shadow: 0 0 0 2px white; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #CBD5E1; border-radius: 2px; }
         input[type=range]:focus { outline: none; }
+        
+        /* Canvas fixed sizing */
+        #simCanvas { width: 100%; height: 300px; display: block; }
+        @media (min-width: 1024px) { #simCanvas { height: 350px; } }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col font-sans">
@@ -52,7 +56,6 @@
             <div class="text-right text-xs text-blue-200">
                 <p><strong>Authors:</strong> Hasan, M.T.*, Khan, M.S.</p>
                 <p>Manarat International University, Bangladesh</p>
-                <p class="font-mono text-[0.6rem] mt-1 text-blue-300">JOMS-SUB-2026-XXXX</p>
             </div>
         </div>
     </header>
@@ -63,6 +66,13 @@
         <!-- COL 1: SIMULATION CONTROLS & MATH ENGINE -->
         <div class="xl:col-span-3 space-y-4">
             
+            <!-- Manuscript Context Box -->
+            <div class="card p-4 bg-blue-50 border-blue-200">
+                <p class="text-[0.65rem] text-clinical leading-relaxed italic">
+                    <strong>Figure 2 Context:</strong> "To demonstrate the clinical logic of the architecture, we instantiated the MAST framework as an interactive, web-based prototype. As shown, adjusting glutamine and starvation levels allows the mathematical engine to recalculate drug influx and dynamically update the Clinical Decision Support (CDS) output, visually demonstrating the metabolic blind spot."
+                </p>
+            </div>
+
             <!-- Controls -->
             <div class="card p-5">
                 <h2 class="text-sm font-bold text-clinical border-b border-gray-200 pb-2 mb-4"><i class="fas fa-sliders-h mr-2"></i>Metabolic Inputs</h2>
@@ -72,7 +82,7 @@
                     <div>
                         <div class="flex justify-between text-xs font-bold mb-1">
                             <span>Glutamine Availability</span>
-                            <span id="val-glutamine" class="font-mono text-clinical bg-blue-50 px-2 py-0.5 rounded">80%</span>
+                            <span id="val-glutamine" class="font-mono text-clinical bg-blue-100 px-2 py-0.5 rounded">80%</span>
                         </div>
                         <input type="range" id="input-glutamine" min="0" max="100" value="80" oninput="updateEngine()">
                         <p class="text-[0.6rem] text-gray-500 mt-1">Drives CpxA/CpxR downregulation of OmpF.</p>
@@ -82,7 +92,7 @@
                     <div>
                         <div class="flex justify-between text-xs font-bold mb-1">
                             <span>Starvation / ppGpp Stress</span>
-                            <span id="val-starvation" class="font-mono text-danger bg-red-50 px-2 py-0.5 rounded">15%</span>
+                            <span id="val-starvation" class="font-mono text-danger bg-red-100 px-2 py-0.5 rounded">15%</span>
                         </div>
                         <input type="range" id="input-starvation" min="0" max="100" value="15" oninput="updateEngine()">
                         <p class="text-[0.6rem] text-gray-500 mt-1">Drives stringent response and PCN amplification.</p>
@@ -92,7 +102,7 @@
                     <div>
                         <div class="flex justify-between text-xs font-bold mb-1">
                             <span>Antibiotic Dose (µg/mL)</span>
-                            <span id="val-antibiotic" class="font-mono text-gray-800 bg-gray-100 px-2 py-0.5 rounded">50</span>
+                            <span id="val-antibiotic" class="font-mono text-gray-800 bg-gray-200 px-2 py-0.5 rounded">50</span>
                         </div>
                         <input type="range" id="input-antibiotic" min="10" max="100" value="50" oninput="updateEngine()">
                         <p class="text-[0.6rem] text-gray-500 mt-1">Total drug concentration available for influx.</p>
@@ -106,7 +116,7 @@
                 <div class="space-y-2 text-xs font-mono">
                     <div class="flex justify-between items-center text-blue-200">
                         <span>V<sub>in</sub> (Influx Rate)</span>
-                        <span id="calc-vin" class="text-white font-bold text-sm">45.0</span>
+                        <span id="calc-vin" class="text-white font-bold text-sm">40.0</span>
                     </div>
                     <div class="flex justify-between items-center text-blue-200">
                         <span>V<sub>e</sub> (Efflux Rate)</span>
@@ -142,33 +152,21 @@
                     <span class="text-[0.65rem] font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">Module 2 Output</span>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <!-- Static Lab -->
-                    <div class="border border-gray-200 rounded p-3 bg-gray-50">
-                        <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-xs font-bold text-gray-700">Standard AST (In Vitro)</h3>
-                            <span class="text-[0.6rem] font-bold text-gray-500">Static</span>
-                        </div>
-                        <div class="text-[0.6rem] font-mono text-gray-600 mb-2">Gln: 80% | Starv: 15%</div>
-                        <canvas id="canvas-lab" width="300" height="140" class="w-full bg-slate-900 rounded"></canvas>
-                        <div class="mt-2 text-center">
-                            <div class="text-[0.65rem] font-bold text-gray-500">Predicted Efficacy</div>
-                            <div class="text-lg font-extrabold text-success">100%</div>
-                        </div>
+                <div class="w-full bg-slate-900 rounded-lg overflow-hidden relative">
+                    <canvas id="simCanvas" width="1000" height="350"></canvas>
+                    <!-- Labels overlay -->
+                    <div class="absolute top-2 left-4 text-blue-400 text-xs font-bold">Standard AST (In Vitro)</div>
+                    <div class="absolute top-2 right-4 text-red-400 text-xs font-bold text-right">MAST (In Vivo)</div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mt-3">
+                    <div class="text-center border-r border-gray-100 pr-2">
+                        <div class="text-[0.65rem] font-bold text-gray-500">Lab Efficacy</div>
+                        <div class="text-lg font-extrabold text-success">100%</div>
                     </div>
-
-                    <!-- Dynamic Host -->
-                    <div class="border border-red-200 rounded p-3 bg-red-50">
-                        <div class="flex justify-between items-center mb-1">
-                            <h3 class="text-xs font-bold text-red-900">MAST (In Vivo)</h3>
-                            <span class="text-[0.6rem] font-bold text-red-600 animate-pulse">Live</span>
-                        </div>
-                        <div class="text-[0.6rem] font-mono text-red-700 mb-2">Gln: <span id="ui-glutamine">80</span>% | Starv: <span id="ui-starvation">15</span>%</div>
-                        <canvas id="canvas-host" width="300" height="140" class="w-full bg-slate-900 rounded"></canvas>
-                        <div class="mt-2 text-center">
-                            <div class="text-[0.65rem] font-bold text-red-500">Predicted Efficacy</div>
-                            <div id="ui-efficacy" class="text-lg font-extrabold text-success">100%</div>
-                        </div>
+                    <div class="text-center pl-2">
+                        <div class="text-[0.65rem] font-bold text-red-500">Host Efficacy</div>
+                        <div id="ui-efficacy" class="text-lg font-extrabold text-success">100%</div>
                     </div>
                 </div>
             </div>
@@ -177,7 +175,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="card p-4">
                     <h3 class="text-xs font-bold text-clinical mb-1">Kinetic Threshold (V<sub>in</sub> vs Clearance)</h3>
-                    <p class="text-[0.6rem] text-gray-500 mb-2">Red shaded area indicates high risk of clinical failure.</p>
+                    <p class="text-[0.6rem] text-gray-500 mb-2">Red area indicates high risk of clinical failure.</p>
                     <div class="chart-container"><canvas id="chart-kinetics"></canvas></div>
                 </div>
                 <div class="card p-4">
@@ -322,73 +320,207 @@
         });
 
         // ==========================================
-        // 2. HIGH-FIDELITY CANVAS RENDERING
+        // 2. PARTICLE ENGINE & CANVAS RENDERING
         // ==========================================
-        function drawCellCanvas(canvasId, g, s, isLab) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext('2d');
-            const w = canvas.width, h = canvas.height;
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const h = canvas.height;
+        
+        // Split canvas in half: Left = Lab, Right = Host
+        const midX = w / 2;
+        const membraneY = 150; // Position of the outer membrane
 
-            // Backgrounds
-            ctx.fillStyle = '#0F172A'; ctx.fillRect(0, 0, w, 45);          // Extracellular
-            ctx.fillStyle = '#1E293B'; ctx.fillRect(0, 45, w, 20);         // Periplasm
-            ctx.fillStyle = '#0B1120'; ctx.fillRect(0, 65, w, h - 65);     // Cytoplasm
+        let particles = [];
 
-            // Draw Lipid Bilayers
-            ctx.fillStyle = '#475569';
-            for(let i=0; i<w; i+=10) {
-                ctx.beginPath(); ctx.arc(i, 42, 2, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(i, 48, 2, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(i, 62, 2, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(i, 68, 2, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.fillStyle = '#334155'; ctx.fillRect(0, 44, w, 4); ctx.fillRect(0, 64, w, 4);
-
-            // OmpF Porins
-            const porins = 4; const spacing = w / (porins + 1);
-            const isOpen = g > 40;
-            for (let i = 1; i <= porins; i++) {
-                const px = i * spacing;
-                ctx.fillStyle = isOpen ? '#10B981' : '#EF4444';
-                ctx.beginPath(); ctx.roundRect(px - 8, 35, 16, 38, 3); ctx.fill();
-                
-                // Visual channel
-                ctx.fillStyle = isOpen ? '#0F172A' : '#7F1D1D';
-                ctx.beginPath(); ctx.roundRect(px - 3, 35, 6, 38, 1); ctx.fill();
+        // Particle Class
+        class DrugParticle {
+            constructor(x, y, side) {
+                this.x = x;
+                this.y = y;
+                this.side = side; // 'left' (lab) or 'right' (host)
+                this.vy = Math.random() * 1.5 + 1; // Speed downwards
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.state = 'extracellular'; // extracellular, intracellular, bouncing
+                this.color = '#22D3EE'; // Cyan (Drug)
+                this.size = 2.5;
             }
 
-            // Efflux Pumps (Active if S > 40 and not lab)
-            if (s > 40 && !isLab) {
-                for (let i = 1; i <= 2; i++) {
-                    const px = i * (w / 3) + 20;
-                    ctx.fillStyle = '#F97316';
-                    ctx.beginPath(); ctx.moveTo(px - 8, 50); ctx.lineTo(px, 30); ctx.lineTo(px + 8, 50); ctx.lineTo(px + 4, 80); ctx.lineTo(px - 4, 80); ctx.fill();
+            update(isOpen, isEffluxActive) {
+                // Apply physics
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Get side bounds
+                const minX = this.side === 'left' ? 10 : midX + 10;
+                const maxX = this.side === 'left' ? midX - 10 : w - 10;
+
+                // Bounce off side walls
+                if (this.x < minX || this.x > maxX) {
+                    this.vx *= -1;
+                    this.x = Math.max(minX, Math.min(maxX, this.x));
+                }
+
+                // Membrane interaction
+                if (this.state === 'extracellular') {
+                    if (this.y > membraneY - 10) {
+                        if (isOpen) {
+                            // Pass through (OmpF is open)
+                            this.state = 'intracellular';
+                            this.color = '#F472B6'; // Pink (Internalized)
+                            this.vy = Math.random() * 1 + 0.5; // Slow down inside
+                        } else {
+                            // Bounce off (OmpF is closed)
+                            this.y = membraneY - 10;
+                            this.vy = -Math.abs(this.vy); // Move up
+                            this.state = 'bouncing';
+                        }
+                    }
+                } else if (this.state === 'bouncing') {
+                    if (this.y < 10) {
+                        // Reset to top
+                        this.y = 10;
+                        this.vy = Math.abs(this.vy);
+                        this.state = 'extracellular';
+                    }
+                } else if (this.state === 'intracellular') {
+                    // Efflux pump logic
+                    if (isEffluxActive && Math.random() < 0.03) {
+                        // Captured by pump and expelled
+                        this.state = 'extracellular';
+                        this.color = '#22D3EE';
+                        this.y = 10;
+                        this.vy = Math.abs(this.vy);
+                    }
+                    // Settle in cytoplasm
+                    if (this.y > h - 20) {
+                        this.y = h - 20;
+                        this.vy = 0;
+                    }
                 }
             }
 
-            // Plasmids
-            const pcn = isLab ? 1 : Math.floor(1 + (s / 100) * 6);
-            ctx.strokeStyle = '#C084FC'; ctx.lineWidth = 1.5;
-            for (let i = 0; i < pcn; i++) {
-                const px = w/2 + (i%3)*50 - 50;
-                const py = 90 + Math.floor(i/3)*25;
-                ctx.beginPath(); ctx.ellipse(px, py, 10, 5, Math.PI/4, 0, Math.PI*2); ctx.stroke();
-                ctx.beginPath(); ctx.ellipse(px, py, 10, 5, -Math.PI/4, 0, Math.PI*2); ctx.stroke();
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawStaticCell(isLeft) {
+            const startX = isLeft ? 0 : midX;
+            const cellW = midX;
+            const isOpen = isLeft ? true : (parseInt(document.getElementById('input-glutamine').value) > 40);
+            const isEffluxActive = isLeft ? false : (parseInt(document.getElementById('input-starvation').value) > 40);
+
+            // 1. Backgrounds
+            ctx.fillStyle = '#0F172A'; ctx.fillRect(startX, 0, cellW, membraneY);       // Extracellular
+            ctx.fillStyle = '#1E293B'; ctx.fillRect(startX, membraneY, cellW, 40);      // Periplasm
+            ctx.fillStyle = '#0B1120'; ctx.fillRect(startX, membraneY + 40, cellW, h);  // Cytoplasm
+
+            // 2. Membranes (Lipid Bilayer)
+            ctx.fillStyle = '#475569';
+            for(let i = startX + 10; i < startX + cellW; i += 12) {
+                ctx.beginPath(); ctx.arc(i, membraneY - 5, 2.5, 0, Math.PI*2); ctx.fill(); // Outer top
+                ctx.beginPath(); ctx.arc(i, membraneY + 5, 2.5, 0, Math.PI*2); ctx.fill(); // Outer bot
+                ctx.beginPath(); ctx.arc(i, membraneY + 35, 2.5, 0, Math.PI*2); ctx.fill(); // Inner top
+                ctx.beginPath(); ctx.arc(i, membraneY + 45, 2.5, 0, Math.PI*2); ctx.fill(); // Inner bot
             }
 
-            // Labels
-            ctx.fillStyle = '#94A3B8'; ctx.font = '8px monospace';
-            ctx.fillText('EXTRACELLULAR', 5, 15);
-            ctx.fillText('PERIPLASM', 5, 58);
-            ctx.fillText('CYTOPLASM', 5, 80);
+            // 3. OmpF Porins
+            const porins = 4;
+            const spacing = cellW / (porins + 1);
+            const porinPositions = [];
+            for (let i = 1; i <= porins; i++) {
+                const px = startX + i * spacing;
+                porinPositions.push(px);
+                ctx.fillStyle = isOpen ? '#10B981' : '#EF4444';
+                ctx.beginPath(); ctx.roundRect(px - 10, membraneY - 15, 20, 30, 3); ctx.fill();
+                
+                // Channel hole
+                ctx.fillStyle = isOpen ? '#0F172A' : '#7F1D1D';
+                ctx.beginPath(); ctx.roundRect(px - 4, membraneY - 15, 8, 30, 1); ctx.fill();
+            }
+
+            // 4. Efflux Pumps
+            if (isEffluxActive) {
+                for (let i = 1; i <= 2; i++) {
+                    const px = startX + i * (cellW / 3) + 20;
+                    ctx.fillStyle = '#F97316';
+                    ctx.beginPath(); ctx.moveTo(px - 8, membraneY + 5); ctx.lineTo(px, membraneY - 30); ctx.lineTo(px + 8, membraneY + 5); ctx.lineTo(px + 4, membraneY + 40); ctx.lineTo(px - 4, membraneY + 40); ctx.fill();
+                }
+            }
+
+            // 5. Plasmids
+            const s = isLeft ? 15 : parseInt(document.getElementById('input-starvation').value);
+            const pcn = isLeft ? 1 : Math.floor(1 + (s / 100) * 6);
+            ctx.strokeStyle = '#C084FC'; ctx.lineWidth = 1.5;
+            for (let i = 0; i < pcn; i++) {
+                const px = startX + cellW/2 + (i%3)*50 - 50;
+                const py = membraneY + 100 + Math.floor(i/3)*30;
+                ctx.beginPath(); ctx.ellipse(px, py, 12, 6, Math.PI/4, 0, Math.PI*2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(px, py, 12, 6, -Math.PI/4, 0, Math.PI*2); ctx.stroke();
+            }
+
+            // 6. Labels
+            ctx.fillStyle = '#94A3B8'; ctx.font = '9px monospace';
+            ctx.fillText('EXTRACELLULAR', startX + 10, 20);
+            ctx.fillText('PERIPLASM', startX + 10, membraneY + 25);
+            ctx.fillText('CYTOPLASM', startX + 10, membraneY + 60);
             
-            ctx.fillStyle = '#E2E8F0'; ctx.font = '9px sans-serif';
-            ctx.fillText('OmpF: ' + (isOpen ? 'OPEN' : 'CLOSED'), w - 80, 15);
-            ctx.fillText('PCN: ' + pcn + 'x', w - 80, 28);
+            ctx.fillStyle = '#E2E8F0'; ctx.font = '10px sans-serif';
+            ctx.fillText('OmpF: ' + (isOpen ? 'OPEN' : 'CLOSED'), startX + cellW - 110, 25);
+            ctx.fillText('PCN: ' + pcn + 'x', startX + cellW - 110, 40);
+            ctx.fillText('Efflux: ' + (isEffluxActive ? 'ACTIVE' : 'INACTIVE'), startX + cellW - 110, 55);
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            
+            // Draw background cells
+            drawStaticCell(true); // Left (Lab)
+            drawStaticCell(false); // Right (Host)
+
+            // Draw dividing line
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(midX, 0); ctx.lineTo(midX, h); ctx.stroke();
+
+            // Logic for particle generation
+            const a = parseInt(document.getElementById('input-antibiotic').value);
+            // Generate more particles if dose is high
+            if (particles.length < a / 2) {
+                particles.push(new DrugParticle(Math.random() * (midX - 20) + 10, 0, 'left')); // Lab particle
+                particles.push(new DrugParticle(Math.random() * (midX - 20) + midX + 10, 0, 'right')); // Host particle
+            }
+
+            const isHostOpen = parseInt(document.getElementById('input-glutamine').value) > 40;
+            const isHostEfflux = parseInt(document.getElementById('input-starvation').value) > 40;
+
+            // Update and draw particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                
+                if (p.side === 'left') {
+                    p.update(true, false); // Lab is always open, no efflux
+                } else {
+                    p.update(isHostOpen, isHostEfflux); // Host is dynamic
+                }
+                
+                p.draw();
+
+                // Remove particles that fall way off screen
+                if (p.y > h + 50) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(animate);
         }
 
         // ==========================================
-        // 3. ENGINE LOGIC
+        // 3. ENGINE LOGIC (Math & UI)
         // ==========================================
         let currentData = { g: 80, s: 15, a: 50, vin: 0, thresh: 0, eff: 0, risk: '' };
 
@@ -401,13 +533,11 @@
             document.getElementById('val-glutamine').innerText = g + '%';
             document.getElementById('val-starvation').innerText = s + '%';
             document.getElementById('val-antibiotic').innerText = a;
-            document.getElementById('ui-glutamine').innerText = g;
-            document.getElementById('ui-starvation').innerText = s;
 
             // Math Model (Transparent Assumptions)
-            const vh = 5.0; // Constant host clearance
-            const ve = (s / 100) * 20; // Efflux scales with starvation
-            const vin = (g / 100) * a; // Influx scales with glutamine and dose
+            const vh = 5.0; 
+            const ve = (s / 100) * 20; 
+            const vin = (g / 100) * a; 
             const thresh = 4 * (ve + vh);
             
             document.getElementById('calc-vin').innerText = vin.toFixed(1);
@@ -430,10 +560,6 @@
             effEl.innerText = eff + '%';
             effEl.className = 'text-lg font-extrabold ' + (eff > 70 ? 'text-success' : eff > 40 ? 'text-warning' : 'text-danger');
 
-            // Update Canvases
-            drawCellCanvas('canvas-lab', 80, 15, true); // Static Lab
-            drawCellCanvas('canvas-host', g, s, false); // Dynamic Host
-
             // CDSS Output
             const riskBox = document.getElementById('cdss-risk-box');
             const riskEl = document.getElementById('cdss-risk');
@@ -453,7 +579,6 @@
                 riskLabel.className = 'text-[0.6rem] font-bold text-emerald-600 uppercase';
                 riskBox.className = 'bg-emerald-50 p-3 rounded border border-emerald-200 flex justify-between items-center transition-colors';
                 iconEl.className = 'fas fa-check-circle text-success text-xl';
-                
                 actionEl.innerText = 'Proceed with standard therapy.';
                 actionEl.className = 'text-xs font-bold text-emerald-900 leading-snug';
                 actionBox.className = 'card border-l-4 border-l-success p-5 bg-emerald-50';
@@ -462,7 +587,6 @@
                 riskLabel.className = 'text-[0.6rem] font-bold text-amber-600 uppercase';
                 riskBox.className = 'bg-amber-50 p-3 rounded border border-amber-200 flex justify-between items-center transition-colors';
                 iconEl.className = 'fas fa-exclamation-triangle text-warning text-xl';
-                
                 actionEl.innerText = 'Consider higher dose or therapeutic drug monitoring.';
                 actionEl.className = 'text-xs font-bold text-amber-900 leading-snug';
                 actionBox.className = 'card border-l-4 border-l-warning p-5 bg-amber-50';
@@ -471,7 +595,6 @@
                 riskLabel.className = 'text-[0.6rem] font-bold text-red-600 uppercase';
                 riskBox.className = 'bg-red-50 p-3 rounded border border-red-200 flex justify-between items-center transition-colors';
                 iconEl.className = 'fas fa-times-circle text-danger text-xl';
-                
                 actionEl.innerText = 'Escalate to alternative agent. Standard therapy likely to fail in vivo.';
                 actionEl.className = 'text-xs font-bold text-red-900 leading-snug';
                 actionBox.className = 'card border-l-4 border-l-danger p-5 bg-red-50';
@@ -511,14 +634,6 @@
             currentData = { g, s, a, vin: vin.toFixed(2), thresh: thresh.toFixed(2), eff, risk: riskEl.innerText };
         }
 
-        // Presets
-        function loadPreset(g, s, a) {
-            document.getElementById('input-glutamine').value = g;
-            document.getElementById('input-starvation').value = s;
-            document.getElementById('input-antibiotic').value = a;
-            updateEngine();
-        }
-
         // CSV Export
         function exportCSV() {
             let csv = 'MAST Prototype Audit Trail (V2)\n';
@@ -544,9 +659,10 @@
         }
 
         // Init
-        window.onload = () => {
+        window.addEventListener('load', () => {
             updateEngine();
-        };
+            animate();
+        });
     </script>
 </body>
 </html>
