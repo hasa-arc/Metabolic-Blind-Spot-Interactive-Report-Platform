@@ -1,540 +1,552 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAST Framework Prototype v3.0 | Supplementary File 1</title>
-    <!-- Use standard Chart.js CDN with explicit version -->
+    <title>MAST Framework Dashboard | Supplementary File 1</title>
+    <!-- Chart.js for Publication-Grade Data Viz -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Tailwind for Layout -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { colors: { primary: '#0F2C59', danger: '#D9534F', success: '#2E7D32' }}}
+            theme: {
+                extend: {
+                    colors: {
+                        clinical: '#0F2C59', // Deep Navy
+                        danger: '#D9534F',   // Crimson
+                        success: '#2E7D32',  // Forest Green
+                        warning: '#F59E0B',  // Amber
+                        bg: '#F8FAFC'        // Off-white
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'], mono: ['Courier New', 'monospace'] }
+                }
+            }
         }
     </script>
     <style>
-        :root { --bg: #FAFAFA; --fg: #2D3748; --card: #ffffff; --border: #E2E8F0; }
-        .dark { --bg: #0B1120; --fg: #E2E8F0; --card: #0F172A; --border: #1E293B; }
-        body { background: var(--bg); color: var(--fg); font-family: 'Inter', system-ui, sans-serif; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 0.5rem; }
-        .tab-btn { transition: all 0.2s ease; font-weight: 600; font-size: 0.75rem;
-                   padding: 0.5rem 0.75rem; border-radius: 0.5rem; color: #64748B;
-                   border-bottom: 3px solid transparent; white-space: nowrap; }
-        .tab-btn:hover { background: #F1F5F9; color: #0F2C59; }
-        .dark .tab-btn:hover { background: #1E293B; color: #93C5FD; }
-        .tab-btn.active { color: #0F2C59; background: #EFF6FF; border-bottom-color: #0F2C59; border-radius: 0.5rem 0.5rem 0 0; }
-        .dark .tab-btn.active { color: #93C5FD; background: rgba(59,130,246,0.15); border-bottom-color: #93C5FD; }
-        
-        /* Chart container sizing is CRITICAL */
+        body { background-color: #F8FAFC; color: #1E293B; }
+        .card { background: #ffffff; border: 1px solid #E2E8F0; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .chart-container { position: relative; width: 100%; height: 220px; }
-        #cellCanvas { width: 100%; height: 280px; display: block; }
-        @media (min-width: 768px) { #cellCanvas { height: 320px; } .chart-container { height: 240px; } }
         
-        .fade-in-up { opacity: 0; transform: translateY(8px); transition: opacity 0.4s, transform 0.4s; }
-        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
-        .efficacy-bar { transition: width 0.3s ease, background-color 0.3s ease; }
-        
-        @media print { nav, footer, .no-print { display: none !important; } .fade-in-up { opacity: 1 !important; transform: none !important; } }
+        /* Custom Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: #0F2C59; cursor: pointer; margin-top: -7px; box-shadow: 0 0 0 2px white; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #CBD5E1; border-radius: 2px; }
+        input[type=range]:focus { outline: none; }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col">
+<body class="antialiased min-h-screen flex flex-col font-sans">
 
     <!-- HEADER -->
-    <header class="bg-[#0F2C59] text-white shadow-lg border-b-4 border-[#003366]">
-        <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <header class="bg-clinical text-white shadow-md border-b-4 border-blue-900">
+        <div class="max-w-screen-2xl mx-auto px-6 py-4 flex justify-between items-center">
             <div>
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                    <span class="bg-[#D9534F] text-white text-[0.6rem] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"><i class="fas fa-file-alt mr-1"></i> Supplementary File 1</span>
-                    <span class="bg-[#003366] text-blue-100 text-[0.6rem] font-semibold px-2.5 py-0.5 rounded-full"><i class="fas fa-code mr-1"></i> Open-Source Artifact v3.0</span>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-microscope text-2xl text-blue-300"></i>
+                    <h1 class="text-xl font-bold tracking-tight">Metabolism-Aware Susceptibility Testing (MAST)</h1>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">Metabolism-Aware Susceptibility Testing (MAST)</h1>
-                <p class="text-blue-200 text-sm mt-1 max-w-4xl">Interactive Clinical Decision Support Prototype — Instantiating the Three-Module Computational Architecture</p>
+                <p class="text-blue-200 text-xs mt-1">Clinical Decision Support Prototype V2 | Supplementary File 1</p>
             </div>
-            <div class="bg-[#003366]/60 p-3 rounded-lg border border-blue-400/30 text-xs text-blue-100 min-w-[220px]">
-                <p class="font-bold text-white mb-1"><i class="fas fa-users mr-1"></i> Authors:</p>
-                <p>Muhammad Tasnimul Hasan*</p>
-                <p>Mahfuza Siddika Khan</p>
-                <p class="text-blue-300 text-[0.6rem] mt-0.5">Manarat International University, Bangladesh</p>
+            <div class="text-right text-xs text-blue-200">
+                <p><strong>Authors:</strong> Hasan, M.T.*, Khan, M.S.</p>
+                <p>Manarat International University, Bangladesh</p>
+                <p class="font-mono text-[0.6rem] mt-1 text-blue-300">JOMS-SUB-2026-XXXX</p>
             </div>
         </div>
     </header>
 
-    <!-- NAVIGATION -->
-    <nav class="bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 shadow-sm backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 flex space-x-1 sm:space-x-3 overflow-x-auto py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400">
-            <button onclick="switchTab('executive')" id="tab-executive" class="tab-btn active"><i class="fas fa-chart-pie mr-1"></i> Executive Summary</button>
-            <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn"><i class="fas fa-sliders-h mr-1"></i> Predictive Simulator</button>
-            <button onclick="switchTab('mechanisms')" id="tab-mechanisms" class="tab-btn"><i class="fas fa-dna mr-1"></i> Mechanistic Framework</button>
-            <button onclick="switchTab('roadmap')" id="tab-roadmap" class="tab-btn"><i class="fas fa-road mr-1"></i> Translational Roadmap</button>
-        </div>
-    </nav>
+    <!-- MAIN DASHBOARD -->
+    <main class="flex-grow max-w-screen-2xl w-full mx-auto px-4 py-6 grid grid-cols-1 xl:grid-cols-12 gap-6">
 
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8">
+        <!-- COL 1: SIMULATION CONTROLS & MATH ENGINE -->
+        <div class="xl:col-span-3 space-y-4">
+            
+            <!-- Controls -->
+            <div class="card p-5">
+                <h2 class="text-sm font-bold text-clinical border-b border-gray-200 pb-2 mb-4"><i class="fas fa-sliders-h mr-2"></i>Metabolic Inputs</h2>
+                
+                <div class="space-y-6">
+                    <!-- Glutamine -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>Glutamine Availability</span>
+                            <span id="val-glutamine" class="font-mono text-clinical bg-blue-50 px-2 py-0.5 rounded">80%</span>
+                        </div>
+                        <input type="range" id="input-glutamine" min="0" max="100" value="80" oninput="updateEngine()">
+                        <p class="text-[0.6rem] text-gray-500 mt-1">Drives CpxA/CpxR downregulation of OmpF.</p>
+                    </div>
 
-        <!-- EXECUTIVE SUMMARY -->
-        <section id="sec-executive" class="space-y-6 fade-in-up visible">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="card p-5 border-l-4 border-l-[#D9534F]">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Global AMR Burden</span>
-                    <div class="text-3xl font-extrabold text-[#D9534F] mt-1">1.91M</div>
-                    <div class="text-xs text-slate-600 mt-1">Annual attributable deaths by 2050</div>
-                </div>
-                <div class="card p-5 border-l-4 border-l-[#0F2C59]">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bangladesh Burden</span>
-                    <div class="text-3xl font-extrabold text-[#0F2C59] mt-1">26,648</div>
-                    <div class="text-xs text-slate-600 mt-1">Deaths from carbapenem-R infections</div>
-                </div>
-                <div class="card p-5 border-l-4 border-l-amber-500">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Treatment Gap</span>
-                    <div class="text-3xl font-extrabold text-amber-600 mt-1">0.96%</div>
-                    <div class="text-xs text-slate-600 mt-1">Patients receiving appropriate antibiotics</div>
-                </div>
-                <div class="card p-5 border-l-4 border-l-[#2E7D32]">
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">PCN Amplification</span>
-                    <div class="text-3xl font-extrabold text-[#2E7D32] mt-1">3× – 89×</div>
-                    <div class="text-xs text-slate-600 mt-1">Cryptic gene dosage surge in host</div>
-                </div>
-            </div>
-            <div class="card p-6 bg-gradient-to-br from-[#0F2C59] to-[#003366] text-white">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-amber-400 mb-2"><i class="fas fa-quote-left mr-2"></i> Core Diagnostic Imperative</h3>
-                <p class="text-base sm:text-lg font-semibold italic leading-snug">"Metabolic state is not a confounding variable in antimicrobial testing; it is the definitive variable governing bacterial survival <em>in vivo</em>."</p>
-            </div>
-        </section>
+                    <!-- Starvation -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>Starvation / ppGpp Stress</span>
+                            <span id="val-starvation" class="font-mono text-danger bg-red-50 px-2 py-0.5 rounded">15%</span>
+                        </div>
+                        <input type="range" id="input-starvation" min="0" max="100" value="15" oninput="updateEngine()">
+                        <p class="text-[0.6rem] text-gray-500 mt-1">Drives stringent response and PCN amplification.</p>
+                    </div>
 
-        <!-- SIMULATOR -->
-        <section id="sec-simulator" class="hidden space-y-6 fade-in-up">
-            <div class="card p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                <div>
-                    <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-1"><i class="fas fa-sliders-h text-[#003366] mr-2"></i>Predictive Simulator</h2>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">Adjust metabolic state to visualize OmpF permeability, plasmid copy number, and clinical efficacy.</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="setScenario(80,15,50)" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50"><i class="fas fa-flask mr-1"></i>Lab Control</button>
-                    <button onclick="setScenario(15,75,40)" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50"><i class="fas fa-tint mr-1"></i>Sepsis</button>
+                    <!-- Antibiotic Dose -->
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>Antibiotic Dose (µg/mL)</span>
+                            <span id="val-antibiotic" class="font-mono text-gray-800 bg-gray-100 px-2 py-0.5 rounded">50</span>
+                        </div>
+                        <input type="range" id="input-antibiotic" min="10" max="100" value="50" oninput="updateEngine()">
+                        <p class="text-[0.6rem] text-gray-500 mt-1">Total drug concentration available for influx.</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Controls -->
-                <div class="lg:col-span-4 card p-5 space-y-5">
-                    <h3 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 border-b pb-2"><i class="fas fa-cogs text-[#D9534F] mr-2"></i>Simulation Controls</h3>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <label class="font-bold text-slate-700 dark:text-slate-300">Glutamine (Mechanism 1)</label>
-                            <span id="val-glutamine" class="font-mono font-bold text-[#003366] dark:text-blue-300">80%</span>
-                        </div>
-                        <input type="range" id="input-glutamine" min="0" max="100" value="80" class="w-full accent-[#003366]" oninput="updateSimulation()">
+            <!-- Math Engine (Falsifiability) -->
+            <div class="card p-5 bg-clinical text-white">
+                <h2 class="text-sm font-bold border-b border-blue-800 pb-2 mb-3"><i class="fas fa-calculator mr-2"></i>Mathematical Engine</h2>
+                <div class="space-y-2 text-xs font-mono">
+                    <div class="flex justify-between items-center text-blue-200">
+                        <span>V<sub>in</sub> (Influx Rate)</span>
+                        <span id="calc-vin" class="text-white font-bold text-sm">45.0</span>
                     </div>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <label class="font-bold text-slate-700 dark:text-slate-300">Starvation / ppGpp (Mechanism 2)</label>
-                            <span id="val-starvation" class="font-mono font-bold text-[#D9534F]">15%</span>
-                        </div>
-                        <input type="range" id="input-starvation" min="0" max="100" value="15" class="w-full accent-[#D9534F]" oninput="updateSimulation()">
+                    <div class="flex justify-between items-center text-blue-200">
+                        <span>V<sub>e</sub> (Efflux Rate)</span>
+                        <span id="calc-ve" class="text-red-300 font-bold text-sm">3.0</span>
                     </div>
-                    <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <label class="font-bold text-slate-700 dark:text-slate-300">Antibiotic Dosage (µg/mL)</label>
-                            <span id="val-antibiotic" class="font-mono font-bold">50</span>
-                        </div>
-                        <input type="range" id="input-antibiotic" min="10" max="100" value="50" class="w-full accent-slate-700" oninput="updateSimulation()">
+                    <div class="flex justify-between items-center text-blue-200">
+                        <span>V<sub>h</sub> (Host Clearance)</span>
+                        <span class="text-white font-bold text-sm">5.0</span>
                     </div>
-
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg space-y-2 text-xs">
-                        <div class="flex justify-between"><span>OmpF Gate</span><span id="status-porin" class="font-bold text-[#2E7D32]">OPEN</span></div>
-                        <div class="flex justify-between"><span>Plasmid PCN</span><span id="status-pcn" class="font-bold">1.0x</span></div>
-                        <div class="flex justify-between"><span>Influx (V<sub>in</sub>)</span><span id="status-vin" class="font-bold text-blue-700">High</span></div>
+                    <div class="border-t border-blue-800 my-2 pt-2 flex justify-between items-center">
+                        <span class="text-blue-300">Threshold 4(V<sub>e</sub>+V<sub>h</sub>)</span>
+                        <span id="calc-thresh" class="text-amber-400 font-bold text-sm">32.0</span>
                     </div>
-
-                    <div>
-                        <div class="flex justify-between text-[10px] text-slate-500 mb-1">
-                            <span>Predicted Clinical Efficacy</span>
-                            <span id="efficacy-label" class="font-bold text-slate-700">75%</span>
-                        </div>
-                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
-                            <div id="efficacy-bar" class="efficacy-bar h-full bg-[#2E7D32] rounded-full" style="width:75%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Visuals -->
-                <div class="lg:col-span-8 space-y-4">
-                    <div class="card p-3">
-                        <h4 class="text-sm font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-bacteria mr-1"></i>Dynamic Bacterial Cross-Section</h4>
-                        <div class="w-full bg-slate-900 rounded-lg overflow-hidden relative">
-                            <canvas id="cellCanvas" width="700" height="320"></canvas>
-                        </div>
-                    </div>
-                    
-                    <!-- CHARTS -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="card p-3">
-                            <h4 class="text-[11px] font-bold text-[#003366] dark:text-blue-300 mb-1">Kinetics: V<sub>in</sub> vs Clearance Threshold</h4>
-                            <div class="chart-container"><canvas id="kineticsChart"></canvas></div>
-                        </div>
-                        <div class="card p-3">
-                            <h4 class="text-[11px] font-bold text-[#D9534F] dark:text-red-300 mb-1">Population Dynamics</h4>
-                            <div class="chart-container"><canvas id="populationChart"></canvas></div>
-                        </div>
+                    <div id="math-status" class="text-center mt-2 py-1 rounded bg-emerald-900/50 text-emerald-300 font-bold text-[0.65rem]">
+                        V<sub>in</sub> > Threshold (Killing)
                     </div>
                 </div>
             </div>
             
-            <!-- CDSS OUTPUT -->
-            <div class="card p-6 border-l-4 border-l-purple-600 bg-gradient-to-r from-purple-50 to-white dark:from-purple-900/10 dark:to-slate-900">
-                <h3 class="text-sm font-bold text-purple-700 dark:text-purple-300 mb-4"><i class="fas fa-user-md mr-2"></i>Clinical Decision Support Output (Module 3)</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <p class="text-[0.65rem] font-bold text-slate-500 uppercase">Standard AST Result</p>
-                        <p class="text-lg font-extrabold text-[#2E7D32] mt-1">SUSCEPTIBLE</p>
-                        <p class="text-[0.6rem] text-slate-500 mt-1">Binary lab label (broth-based)</p>
+            <!-- Export -->
+            <button onclick="exportCSV()" class="w-full bg-white border border-gray-300 text-clinical text-sm font-bold py-2 rounded shadow-sm hover:bg-gray-50 transition flex justify-center items-center gap-2">
+                <i class="fas fa-file-csv"></i> Export Audit Trail (CSV)
+            </button>
+        </div>
+
+        <!-- COL 2: VISUALIZATION & CHARTS -->
+        <div class="xl:col-span-6 space-y-4">
+            
+            <!-- Split Screen Visualizer -->
+            <div class="card p-5">
+                <div class="flex justify-between items-center border-b border-gray-200 pb-2 mb-4">
+                    <h2 class="text-sm font-bold text-clinical"><i class="fas fa-columns mr-2"></i>Translational Gap: Lab vs. Host</h2>
+                    <span class="text-[0.65rem] font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">Module 2 Output</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Static Lab -->
+                    <div class="border border-gray-200 rounded p-3 bg-gray-50">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-xs font-bold text-gray-700">Standard AST (In Vitro)</h3>
+                            <span class="text-[0.6rem] font-bold text-gray-500">Static</span>
+                        </div>
+                        <div class="text-[0.6rem] font-mono text-gray-600 mb-2">Gln: 80% | Starv: 15%</div>
+                        <canvas id="canvas-lab" width="300" height="140" class="w-full bg-slate-900 rounded"></canvas>
+                        <div class="mt-2 text-center">
+                            <div class="text-[0.65rem] font-bold text-gray-500">Predicted Efficacy</div>
+                            <div class="text-lg font-extrabold text-success">100%</div>
+                        </div>
                     </div>
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <p class="text-[0.65rem] font-bold text-slate-500 uppercase">MAST Risk Score</p>
-                        <p id="cds-risk" class="text-lg font-extrabold text-[#2E7D32] mt-1">LOW RISK</p>
-                        <p class="text-[0.6rem] text-slate-500 mt-1">Metabolism-aware prediction</p>
-                    </div>
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                        <p class="text-[0.65rem] font-bold text-slate-500 uppercase">Recommended Action</p>
-                        <p id="cds-action" class="text-sm font-extrabold text-[#2E7D32] mt-1">Proceed with therapy</p>
-                        <p class="text-[0.6rem] text-slate-500 mt-1">Decision support only</p>
+
+                    <!-- Dynamic Host -->
+                    <div class="border border-red-200 rounded p-3 bg-red-50">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="text-xs font-bold text-red-900">MAST (In Vivo)</h3>
+                            <span class="text-[0.6rem] font-bold text-red-600 animate-pulse">Live</span>
+                        </div>
+                        <div class="text-[0.6rem] font-mono text-red-700 mb-2">Gln: <span id="ui-glutamine">80</span>% | Starv: <span id="ui-starvation">15</span>%</div>
+                        <canvas id="canvas-host" width="300" height="140" class="w-full bg-slate-900 rounded"></canvas>
+                        <div class="mt-2 text-center">
+                            <div class="text-[0.65rem] font-bold text-red-500">Predicted Efficacy</div>
+                            <div id="ui-efficacy" class="text-lg font-extrabold text-success">100%</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- MECHANISMS -->
-        <section id="sec-mechanisms" class="hidden space-y-6 fade-in-up">
-            <div class="card p-6">
-                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-dna text-[#D9534F] mr-2"></i>The Two-Mechanism Model</h2>
-                <p class="text-slate-600 dark:text-slate-400 text-sm">Gram-negative bacteria orchestrate a synchronized defense inside the host.</p>
+            <!-- Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="card p-4">
+                    <h3 class="text-xs font-bold text-clinical mb-1">Kinetic Threshold (V<sub>in</sub> vs Clearance)</h3>
+                    <p class="text-[0.6rem] text-gray-500 mb-2">Red shaded area indicates high risk of clinical failure.</p>
+                    <div class="chart-container"><canvas id="chart-kinetics"></canvas></div>
+                </div>
+                <div class="card p-4">
+                    <h3 class="text-xs font-bold text-danger mb-1">Population Dynamics (CFU/mL)</h3>
+                    <p class="text-[0.6rem] text-gray-500 mb-2">Divergence proves the metabolic blind spot.</p>
+                    <div class="chart-container"><canvas id="chart-population"></canvas></div>
+                </div>
             </div>
-        </section>
+        </div>
 
-        <!-- ROADMAP -->
-        <section id="sec-roadmap" class="hidden space-y-6 fade-in-up">
-            <div class="card p-6">
-                <h2 class="text-xl font-bold text-[#0F2C59] dark:text-blue-300 mb-2"><i class="fas fa-road text-[#2E7D32] mr-2"></i>Translational Roadmap</h2>
-                <p class="text-slate-600 dark:text-slate-400 text-sm">Three-tier validation pathway.</p>
+        <!-- COL 3: CDSS & EXPLAINABILITY -->
+        <div class="xl:col-span-3 space-y-4">
+            
+            <!-- CDSS Output -->
+            <div class="card border-t-4 border-t-clinical p-5">
+                <h2 class="text-sm font-bold text-clinical border-b border-gray-200 pb-2 mb-4"><i class="fas fa-user-md mr-2"></i>CDSS Output</h2>
+                
+                <div class="space-y-3">
+                    <div class="bg-gray-50 p-3 rounded border border-gray-200 flex justify-between items-center">
+                        <div>
+                            <div class="text-[0.6rem] font-bold text-gray-500 uppercase">Standard AST</div>
+                            <div class="text-sm font-extrabold text-success mt-0.5">SUSCEPTIBLE</div>
+                        </div>
+                        <i class="fas fa-vial text-success text-xl"></i>
+                    </div>
+                    
+                    <div id="cdss-risk-box" class="bg-emerald-50 p-3 rounded border border-emerald-200 flex justify-between items-center transition-colors">
+                        <div>
+                            <div id="cdss-risk-label" class="text-[0.6rem] font-bold text-emerald-600 uppercase">MAST Risk Score</div>
+                            <div id="cdss-risk" class="text-sm font-extrabold text-success mt-0.5">LOW RISK</div>
+                        </div>
+                        <i id="cdss-icon" class="fas fa-check-circle text-success text-xl"></i>
+                    </div>
+
+                    <div class="bg-gray-50 p-3 rounded border border-gray-200">
+                        <div class="text-[0.6rem] font-bold text-gray-500 uppercase mb-1">Model Confidence</div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex-grow bg-gray-200 rounded-full h-2">
+                                <div id="confidence-bar" class="bg-clinical h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <span id="confidence-val" class="text-xs font-bold text-clinical">85%</span>
+                        </div>
+                        <p class="text-[0.55rem] text-gray-400 mt-1">Based on distance from decision threshold.</p>
+                    </div>
+                </div>
             </div>
-        </section>
 
+            <!-- Recommended Action -->
+            <div id="cdss-action-box" class="card border-l-4 border-l-success p-5 bg-emerald-50">
+                <h2 class="text-xs font-bold text-emerald-800 mb-1"><i class="fas fa-prescription-bottle-medical mr-1"></i>Recommended Action</h2>
+                <p id="cdss-action" class="text-xs font-bold text-emerald-900 leading-snug">Proceed with standard therapy as prescribed.</p>
+                <p class="text-[0.55rem] text-emerald-700 mt-2 italic">Decision support only. Clinical judgment required.</p>
+            </div>
+
+            <!-- Explainability -->
+            <div class="card p-5">
+                <h2 class="text-sm font-bold text-clinical border-b border-gray-200 pb-2 mb-4"><i class="fas fa-chart-bar mr-2"></i>Feature Attribution (SHAP)</h2>
+                <p class="text-[0.65rem] text-gray-500 mb-4">Relative contribution to the final risk prediction.</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>OmpF Permeability</span>
+                            <span id="attr-ompf" class="font-mono text-clinical">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded h-2 overflow-hidden">
+                            <div id="bar-ompf" class="bg-clinical h-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>ppGpp / Starvation</span>
+                            <span id="attr-ppgpp" class="font-mono text-warning">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded h-2 overflow-hidden">
+                            <div id="bar-ppgpp" class="bg-warning h-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-bold mb-1">
+                            <span>Plasmid Copy Number</span>
+                            <span id="attr-pcn" class="font-mono text-danger">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded h-2 overflow-hidden">
+                            <div id="bar-pcn" class="bg-danger h-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
         // ==========================================
-        // 1. TAB SWITCHING (Robust)
+        // 1. CHART INITIALIZATION
         // ==========================================
-        function switchTab(tabId) {
-            // Hide all sections
-            document.querySelectorAll('main > section').forEach(s => {
-                s.classList.add('hidden');
-                s.classList.remove('visible');
-            });
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        const commonOptions = {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Inter' } } } }
+        };
 
-            // Show selected section
-            const target = document.getElementById('sec-' + tabId);
-            const btn = document.getElementById('tab-' + tabId);
+        // Chart A: Kinetics
+        const kinCtx = document.getElementById('chart-kinetics').getContext('2d');
+        const kinChart = new Chart(kinCtx, {
+            type: 'line',
+            data: {
+                labels: ['0','10','20','30','40','50','60','70','80','90','100'],
+                datasets: [
+                    { label: 'V_in (Influx)', data: [], borderColor: '#0F2C59', backgroundColor: 'rgba(15, 44, 89, 0.1)', fill: true, tension: 0.1, pointRadius: 0, borderWidth: 2 },
+                    { label: 'Threshold', data: [], borderColor: '#D9534F', borderDash: [5,5], pointRadius: 0, borderWidth: 2 }
+                ]
+            },
+            options: { 
+                ...commonOptions,
+                scales: {
+                    y: { beginAtZero: true, max: 100, title: { display: true, text: 'Rate (a.u.)', font: {size: 10} } },
+                    x: { title: { display: true, text: 'Glutamine (%)', font: {size: 10} }, grid: { display: false } }
+                }
+            }
+        });
+
+        // Chart B: Population Dynamics
+        const popCtx = document.getElementById('chart-population').getContext('2d');
+        const popChart = new Chart(popCtx, {
+            type: 'line',
+            data: {
+                labels: ['0h','1h','2h','3h','4h','5h','6h'],
+                datasets: [
+                    { label: 'Host (Patient)', data: [], borderColor: '#D9534F', backgroundColor: 'rgba(217, 83, 79, 0.1)', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+                    { label: 'Lab (Control)', data: [100,100,100,100,100,100,100], borderColor: '#0F2C59', borderDash: [5,5], pointRadius: 0, borderWidth: 1 }
+                ]
+            },
+            options: { 
+                ...commonOptions,
+                scales: {
+                    y: { beginAtZero: true, max: 120, title: { display: true, text: 'Log CFU/mL', font: {size: 10} } },
+                    x: { title: { display: true, text: 'Time', font: {size: 10} }, grid: { display: false } }
+                }
+            }
+        });
+
+        // ==========================================
+        // 2. HIGH-FIDELITY CANVAS RENDERING
+        // ==========================================
+        function drawCellCanvas(canvasId, g, s, isLab) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+
+            // Backgrounds
+            ctx.fillStyle = '#0F172A'; ctx.fillRect(0, 0, w, 45);          // Extracellular
+            ctx.fillStyle = '#1E293B'; ctx.fillRect(0, 45, w, 20);         // Periplasm
+            ctx.fillStyle = '#0B1120'; ctx.fillRect(0, 65, w, h - 65);     // Cytoplasm
+
+            // Draw Lipid Bilayers
+            ctx.fillStyle = '#475569';
+            for(let i=0; i<w; i+=10) {
+                ctx.beginPath(); ctx.arc(i, 42, 2, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(i, 48, 2, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(i, 62, 2, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(i, 68, 2, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.fillStyle = '#334155'; ctx.fillRect(0, 44, w, 4); ctx.fillRect(0, 64, w, 4);
+
+            // OmpF Porins
+            const porins = 4; const spacing = w / (porins + 1);
+            const isOpen = g > 40;
+            for (let i = 1; i <= porins; i++) {
+                const px = i * spacing;
+                ctx.fillStyle = isOpen ? '#10B981' : '#EF4444';
+                ctx.beginPath(); ctx.roundRect(px - 8, 35, 16, 38, 3); ctx.fill();
+                
+                // Visual channel
+                ctx.fillStyle = isOpen ? '#0F172A' : '#7F1D1D';
+                ctx.beginPath(); ctx.roundRect(px - 3, 35, 6, 38, 1); ctx.fill();
+            }
+
+            // Efflux Pumps (Active if S > 40 and not lab)
+            if (s > 40 && !isLab) {
+                for (let i = 1; i <= 2; i++) {
+                    const px = i * (w / 3) + 20;
+                    ctx.fillStyle = '#F97316';
+                    ctx.beginPath(); ctx.moveTo(px - 8, 50); ctx.lineTo(px, 30); ctx.lineTo(px + 8, 50); ctx.lineTo(px + 4, 80); ctx.lineTo(px - 4, 80); ctx.fill();
+                }
+            }
+
+            // Plasmids
+            const pcn = isLab ? 1 : Math.floor(1 + (s / 100) * 6);
+            ctx.strokeStyle = '#C084FC'; ctx.lineWidth = 1.5;
+            for (let i = 0; i < pcn; i++) {
+                const px = w/2 + (i%3)*50 - 50;
+                const py = 90 + Math.floor(i/3)*25;
+                ctx.beginPath(); ctx.ellipse(px, py, 10, 5, Math.PI/4, 0, Math.PI*2); ctx.stroke();
+                ctx.beginPath(); ctx.ellipse(px, py, 10, 5, -Math.PI/4, 0, Math.PI*2); ctx.stroke();
+            }
+
+            // Labels
+            ctx.fillStyle = '#94A3B8'; ctx.font = '8px monospace';
+            ctx.fillText('EXTRACELLULAR', 5, 15);
+            ctx.fillText('PERIPLASM', 5, 58);
+            ctx.fillText('CYTOPLASM', 5, 80);
             
-            if (target) {
-                target.classList.remove('hidden');
-                void target.offsetWidth; // Force reflow
-                target.classList.add('visible');
-            }
-            if (btn) btn.classList.add('active');
-
-            // CRITICAL FIX: Resize charts when the tab becomes visible
-            if (tabId === 'simulator') {
-                // Give the DOM 50ms to layout the canvas before resizing
-                setTimeout(() => {
-                    if (kinChart) { kinChart.resize(); kinChart.update(); }
-                    if (popChart) { popChart.resize(); popChart.update(); }
-                    drawCell(); 
-                }, 50);
-            }
+            ctx.fillStyle = '#E2E8F0'; ctx.font = '9px sans-serif';
+            ctx.fillText('OmpF: ' + (isOpen ? 'OPEN' : 'CLOSED'), w - 80, 15);
+            ctx.fillText('PCN: ' + pcn + 'x', w - 80, 28);
         }
 
         // ==========================================
-        // 2. CHART INITIALIZATION (Bulletproof)
+        // 3. ENGINE LOGIC
         // ==========================================
-        let kinChart, popChart;
+        let currentData = { g: 80, s: 15, a: 50, vin: 0, thresh: 0, eff: 0, risk: '' };
 
-        function initCharts() {
-            // --- Kinetics Chart ---
-            const ctxKin = document.getElementById('kineticsChart').getContext('2d');
-            kinChart = new Chart(ctxKin, {
-                type: 'line',
-                data: {
-                    labels: ['0','10','20','30','40','50','60','70','80','90','100'],
-                    datasets: [
-                        { label: 'Drug Influx (Vin)', data: [0,0,0,0,0,0,0,0,0,0,0],
-                          borderColor: '#003366', backgroundColor: 'rgba(0,51,102,0.15)',
-                          fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2 },
-                        { label: 'Clearance Threshold', data: [0,0,0,0,0,0,0,0,0,0,0],
-                          borderColor: '#D9534F', borderDash: [6,4], pointRadius: 0, borderWidth: 2 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, animation: false,
-                    plugins: { legend: { position: 'top', labels: { font: {size: 10}, boxWidth: 12 } } },
-                    scales: {
-                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Rate (a.u.)', font: { size: 9 } } },
-                        x: { title: { display: true, text: 'Glutamine Concentration (%)', font: { size: 9 } }, grid: { display: false } }
-                    }
-                }
-            });
-
-            // --- Population Chart ---
-            const ctxPop = document.getElementById('populationChart').getContext('2d');
-            popChart = new Chart(ctxPop, {
-                type: 'line',
-                data: {
-                    labels: ['0h','1h','2h','3h','4h','5h','6h'],
-                    datasets: [{ label: 'Log CFU/mL', data: [100,100,100,100,100,100,100],
-                                  borderColor: '#D9534F', backgroundColor: 'rgba(217,83,79,0.15)',
-                                  fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, animation: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, max: 120, title: { display: true, text: 'Log CFU/mL', font: { size: 9 } } },
-                        x: { title: { display: true, text: 'Time (hours)', font: { size: 9 } }, grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        // ==========================================
-        // 3. SIMULATION LOGIC
-        // ==========================================
-        function setScenario(g, s, a) {
-            document.getElementById('input-glutamine').value = g;
-            document.getElementById('input-starvation').value = s;
-            document.getElementById('input-antibiotic').value = a;
-            updateSimulation();
-        }
-
-        function updateSimulation() {
+        function updateEngine() {
             const g = parseInt(document.getElementById('input-glutamine').value);
             const s = parseInt(document.getElementById('input-starvation').value);
             const a = parseInt(document.getElementById('input-antibiotic').value);
 
+            // Update UI Text
             document.getElementById('val-glutamine').innerText = g + '%';
             document.getElementById('val-starvation').innerText = s + '%';
             document.getElementById('val-antibiotic').innerText = a;
+            document.getElementById('ui-glutamine').innerText = g;
+            document.getElementById('ui-starvation').innerText = s;
 
-            // Math Model
-            const vin = (g / 100) * (a / 50) * 50;
-            const thresh = 25 + (s / 100) * 45;
-            const pcn = (1 + (s / 100) * 7);
-            const killing = vin > thresh;
+            // Math Model (Transparent Assumptions)
+            const vh = 5.0; // Constant host clearance
+            const ve = (s / 100) * 20; // Efflux scales with starvation
+            const vin = (g / 100) * a; // Influx scales with glutamine and dose
+            const thresh = 4 * (ve + vh);
+            
+            document.getElementById('calc-vin').innerText = vin.toFixed(1);
+            document.getElementById('calc-ve').innerText = ve.toFixed(1);
+            document.getElementById('calc-thresh').innerText = thresh.toFixed(1);
 
-            // Status Panel
-            const porinEl = document.getElementById('status-porin');
-            if (g > 60) { porinEl.innerText = 'OPEN'; porinEl.className = 'font-bold text-[#2E7D32]'; }
-            else if (g > 30) { porinEl.innerText = 'GATED'; porinEl.className = 'font-bold text-amber-600'; }
-            else { porinEl.innerText = 'CLOSED'; porinEl.className = 'font-bold text-[#D9534F]'; }
-
-            document.getElementById('status-pcn').innerText = pcn.toFixed(1) + 'x';
-            document.getElementById('status-vin').innerText = vin > 40 ? 'High' : 'Low';
-
-            // Efficacy Bar
-            const eff = Math.min(100, Math.round((vin / thresh) * 100));
-            document.getElementById('efficacy-label').innerText = eff + '%';
-            const bar = document.getElementById('efficacy-bar');
-            bar.style.width = eff + '%';
-            bar.className = 'efficacy-bar h-full rounded-full ' + (eff > 70 ? 'bg-[#2E7D32]' : eff > 40 ? 'bg-amber-500' : 'bg-[#D9534F]');
-
-            // CDS Output
-            const cdsRisk = document.getElementById('cds-risk');
-            const cdsAction = document.getElementById('cds-action');
-            if (killing) {
-                cdsRisk.innerText = 'LOW RISK'; cdsRisk.className = 'text-lg font-extrabold text-[#2E7D32] mt-1';
-                cdsAction.innerText = 'Proceed with therapy'; cdsAction.className = 'text-sm font-extrabold text-[#2E7D32] mt-1';
+            const isKilling = vin > thresh;
+            const mathStatus = document.getElementById('math-status');
+            if (isKilling) {
+                mathStatus.innerText = 'V_in > Threshold (Killing)';
+                mathStatus.className = 'text-center mt-2 py-1 rounded bg-emerald-900/50 text-emerald-300 font-bold text-[0.65rem]';
             } else {
-                cdsRisk.innerText = 'HIGH RISK'; cdsRisk.className = 'text-lg font-extrabold text-[#D9534F] mt-1';
-                cdsAction.innerText = 'Escalate agent'; cdsAction.className = 'text-sm font-extrabold text-[#D9534F] mt-1';
+                mathStatus.innerText = 'V_in < Threshold (Survival)';
+                mathStatus.className = 'text-center mt-2 py-1 rounded bg-red-900/50 text-red-300 font-bold text-[0.65rem]';
             }
 
-            // Update Charts
-            if (kinChart) {
-                const labs = [0,10,20,30,40,50,60,70,80,90,100];
-                kinChart.data.datasets[0].data = labs.map(v => parseFloat(((v/100) * a).toFixed(1)));
-                kinChart.data.datasets[1].data = labs.map(() => parseFloat(thresh.toFixed(1)));
-                kinChart.update('none');
-            }
-            if (popChart) {
-                const pd = []; let pop = 100;
-                const slope = killing ? -15 : 5;
-                for (let i = 0; i < 7; i++) { pop = Math.max(0, pop + slope); pd.push(Math.round(pop)); }
-                popChart.data.datasets[0].data = pd;
-                popChart.update('none');
+            // Efficacy
+            const eff = Math.min(100, Math.round((vin / thresh) * 100));
+            const effEl = document.getElementById('ui-efficacy');
+            effEl.innerText = eff + '%';
+            effEl.className = 'text-lg font-extrabold ' + (eff > 70 ? 'text-success' : eff > 40 ? 'text-warning' : 'text-danger');
+
+            // Update Canvases
+            drawCellCanvas('canvas-lab', 80, 15, true); // Static Lab
+            drawCellCanvas('canvas-host', g, s, false); // Dynamic Host
+
+            // CDSS Output
+            const riskBox = document.getElementById('cdss-risk-box');
+            const riskEl = document.getElementById('cdss-risk');
+            const riskLabel = document.getElementById('cdss-risk-label');
+            const iconEl = document.getElementById('cdss-icon');
+            const actionBox = document.getElementById('cdss-action-box');
+            const actionEl = document.getElementById('cdss-action');
+            const confBar = document.getElementById('confidence-bar');
+            const confVal = document.getElementById('confidence-val');
+
+            let conf = 100 - Math.min(100, Math.abs(vin - thresh) / thresh * 50);
+            confVal.innerText = Math.round(conf) + '%';
+            confBar.style.width = conf + '%';
+
+            if (isKilling) {
+                riskEl.innerText = 'LOW RISK'; riskEl.className = 'text-sm font-extrabold text-success mt-0.5';
+                riskLabel.className = 'text-[0.6rem] font-bold text-emerald-600 uppercase';
+                riskBox.className = 'bg-emerald-50 p-3 rounded border border-emerald-200 flex justify-between items-center transition-colors';
+                iconEl.className = 'fas fa-check-circle text-success text-xl';
+                
+                actionEl.innerText = 'Proceed with standard therapy.';
+                actionEl.className = 'text-xs font-bold text-emerald-900 leading-snug';
+                actionBox.className = 'card border-l-4 border-l-success p-5 bg-emerald-50';
+            } else if (vin > thresh * 0.7) {
+                riskEl.innerText = 'MODERATE RISK'; riskEl.className = 'text-sm font-extrabold text-warning mt-0.5';
+                riskLabel.className = 'text-[0.6rem] font-bold text-amber-600 uppercase';
+                riskBox.className = 'bg-amber-50 p-3 rounded border border-amber-200 flex justify-between items-center transition-colors';
+                iconEl.className = 'fas fa-exclamation-triangle text-warning text-xl';
+                
+                actionEl.innerText = 'Consider higher dose or therapeutic drug monitoring.';
+                actionEl.className = 'text-xs font-bold text-amber-900 leading-snug';
+                actionBox.className = 'card border-l-4 border-l-warning p-5 bg-amber-50';
+            } else {
+                riskEl.innerText = 'HIGH RISK'; riskEl.className = 'text-sm font-extrabold text-danger mt-0.5';
+                riskLabel.className = 'text-[0.6rem] font-bold text-red-600 uppercase';
+                riskBox.className = 'bg-red-50 p-3 rounded border border-red-200 flex justify-between items-center transition-colors';
+                iconEl.className = 'fas fa-times-circle text-danger text-xl';
+                
+                actionEl.innerText = 'Escalate to alternative agent. Standard therapy likely to fail in vivo.';
+                actionEl.className = 'text-xs font-bold text-red-900 leading-snug';
+                actionBox.className = 'card border-l-4 border-l-danger p-5 bg-red-50';
             }
 
-            // Update Canvas
-            drawCell(g, s);
+            // Explainability (SHAP)
+            const wOmpf = Math.max(0, (100 - g));
+            const wPpGpp = s;
+            const wPcn = (s / 100) * (1 + s/20) * 10;
+            const totalW = wOmpf + wPpGpp + wPcn + 0.001;
+
+            const pOmpf = Math.round((wOmpf/totalW)*100);
+            const pPpGpp = Math.round((wPpGpp/totalW)*100);
+            const pPcn = Math.round((wPcn/totalW)*100);
+
+            document.getElementById('attr-ompf').innerText = pOmpf + '%';
+            document.getElementById('bar-ompf').style.width = pOmpf + '%';
+            document.getElementById('attr-ppgpp').innerText = pPpGpp + '%';
+            document.getElementById('bar-ppgpp').style.width = pPpGpp + '%';
+            document.getElementById('attr-pcn').innerText = pPcn + '%';
+            document.getElementById('bar-pcn').style.width = pPcn + '%';
+
+            // Update Chart A (Kinetics)
+            const labs = [0,10,20,30,40,50,60,70,80,90,100];
+            kinChart.data.datasets[0].data = labs.map(v => (v/100)*a);
+            kinChart.data.datasets[1].data = labs.map(() => thresh);
+            kinChart.update('none');
+
+            // Update Chart B (Population)
+            const popData = []; let pop = 100;
+            const slope = isKilling ? -15 : 5;
+            for (let i = 0; i < 7; i++) { pop = Math.max(0, pop + slope); popData.push(pop); }
+            popChart.data.datasets[0].data = popData;
+            popChart.update('none');
+
+            // Save State
+            currentData = { g, s, a, vin: vin.toFixed(2), thresh: thresh.toFixed(2), eff, risk: riskEl.innerText };
         }
 
-        // ==========================================
-        // 4. HIGH-FIDELITY CANVAS RENDERING (V3.0)
-        // ==========================================
-        const canvas = document.getElementById('cellCanvas');
-        const ctx = canvas.getContext('2d');
-        let drugParticles = [];
-
-        // Initialize drug particles
-        for(let i=0; i<30; i++) {
-            drugParticles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * 80 + 10,
-                speed: Math.random() * 1.5 + 0.5
-            });
+        // Presets
+        function loadPreset(g, s, a) {
+            document.getElementById('input-glutamine').value = g;
+            document.getElementById('input-starvation').value = s;
+            document.getElementById('input-antibiotic').value = a;
+            updateEngine();
         }
 
-        function drawCell(g, s) {
-            if (!canvas || !ctx) return;
-            const w = canvas.width, h = canvas.height;
-            ctx.clearRect(0, 0, w, h);
+        // CSV Export
+        function exportCSV() {
+            let csv = 'MAST Prototype Audit Trail (V2)\n';
+            csv += 'Parameter,Value\n';
+            csv += `Glutamine (%),${currentData.g}\n`;
+            csv += `Starvation (%),${currentData.s}\n`;
+            csv += `Antibiotic (ug/mL),${currentData.a}\n`;
+            csv += `V_in (Influx),${currentData.vin}\n`;
+            csv += `Threshold 4(Ve+Vh),${currentData.thresh}\n`;
+            csv += `Efficacy (%),${currentData.eff}\n`;
+            csv += `MAST Risk,"${currentData.risk}"\n\n`;
+            csv += 'Assumptions:\nVe = 20 * (Starvation/100)\nVh = 5.0\nVin = Antibiotic * (Glutamine/100)\n';
 
-            // 1. Backgrounds
-            ctx.fillStyle = '#0F172A'; ctx.fillRect(0, 0, w, 80);          // Extracellular
-            ctx.fillStyle = '#1E293B'; ctx.fillRect(0, 80, w, 40);         // Periplasm
-            ctx.fillStyle = '#0B1120'; ctx.fillRect(0, 120, w, h - 120);   // Cytoplasm
-
-            // 2. Draw Outer Membrane Lipids (Top)
-            ctx.fillStyle = '#475569';
-            for(let i=0; i<w; i+=15) {
-                ctx.beginPath(); ctx.arc(i, 75, 3, 0, Math.PI*2); ctx.fill(); // Top layer
-                ctx.beginPath(); ctx.arc(i, 85, 3, 0, Math.PI*2); ctx.fill(); // Bottom layer
-            }
-            ctx.fillStyle = '#334155'; ctx.fillRect(0, 76, w, 8); // Hydrophobic core
-
-            // 3. Draw Inner Membrane (Bottom)
-            ctx.fillStyle = '#475569';
-            for(let i=0; i<w; i+=15) {
-                ctx.beginPath(); ctx.arc(i, 115, 3, 0, Math.PI*2); ctx.fill();
-                ctx.beginPath(); ctx.arc(i, 125, 3, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.fillStyle = '#334155'; ctx.fillRect(0, 116, w, 8);
-
-            // 4. Draw OmpF Porins (Barrels)
-            const porinCount = 5; const spacing = w / (porinCount + 1);
-            for (let i = 1; i <= porinCount; i++) {
-                const x = i * spacing;
-                const isOpen = g > 40;
-                
-                // Barrel body
-                ctx.fillStyle = isOpen ? '#10B981' : '#EF4444';
-                ctx.beginPath();
-                ctx.roundRect(x - 12, 65, 24, 30, 4);
-                ctx.fill();
-
-                // Channel hole
-                ctx.fillStyle = isOpen ? '#0F172A' : '#7F1D1D';
-                ctx.beginPath();
-                ctx.roundRect(x - 4, 65, 8, 30, 2);
-                ctx.fill();
-                
-                // Draw drug particles passing through if open
-                if (isOpen) {
-                    ctx.fillStyle = '#22D3EE';
-                    ctx.beginPath(); ctx.arc(x, 80, 3, 0, Math.PI*2); ctx.fill();
-                }
-            }
-
-            // 5. Draw Efflux Pumps (Mechanism 2)
-            if (s > 40) {
-                const pumpCount = 3; const spacing = w / (pumpCount + 1);
-                for (let i = 1; i <= pumpCount; i++) {
-                    const x = i * spacing;
-                    ctx.fillStyle = '#F97316';
-                    // Pump spanning from cytoplasm to outside
-                    ctx.beginPath();
-                    ctx.moveTo(x - 10, 80);
-                    ctx.lineTo(x, 60);
-                    ctx.lineTo(x + 10, 80);
-                    ctx.lineTo(x + 6, 120);
-                    ctx.lineTo(x - 6, 120);
-                    ctx.fill();
-                    
-                    // Efflux particle
-                    ctx.fillStyle = '#22D3EE';
-                    ctx.beginPath(); ctx.arc(x, 70, 3, 0, Math.PI*2); ctx.fill();
-                }
-            }
-
-            // 6. Draw Plasmids (Supercoiled DNA)
-            const pcn = Math.floor(1 + (s / 100) * 6);
-            for (let i = 0; i < pcn; i++) {
-                const px = w/2 + (i%3)*100 - 100;
-                const py = 160 + Math.floor(i/3)*60;
-                
-                ctx.strokeStyle = '#C084FC'; 
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                // Draw a figure-8 to represent supercoiled plasmid
-                ctx.ellipse(px, py, 18, 10, Math.PI/4, 0, Math.PI*2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.ellipse(px, py, 18, 10, -Math.PI/4, 0, Math.PI*2);
-                ctx.stroke();
-            }
-
-            // 7. Animate Extracellular Drug Particles
-            ctx.fillStyle = '#22D3EE';
-            drugParticles.forEach(p => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2); ctx.fill();
-                p.y += p.speed;
-                
-                // If particle hits membrane, reset it (or let it pass if OmpF open)
-                if (p.y > 65) {
-                    p.y = 10;
-                    p.x = Math.random() * w;
-                }
-            });
-
-            // 8. Text Labels
-            ctx.fillStyle = '#94A3B8'; ctx.font = '10px monospace';
-            ctx.fillText('EXTRACELLULAR', 15, 20);
-            ctx.fillText('PERIPLASM', 15, 100);
-            ctx.fillText('CYTOPLASM', 15, 140);
-
-            ctx.fillStyle = '#E2E8F0'; ctx.font = '11px sans-serif';
-            ctx.fillText('OmpF: ' + (g > 40 ? 'OPEN' : 'CLOSED'), w - 150, 25);
-            ctx.fillText('PCN: ' + pcn + 'x', w - 150, 42);
-            ctx.fillText('Efflux: ' + (s > 40 ? 'ACTIVE' : 'INACTIVE'), w - 150, 59);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'MAST_Simulation_Audit.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
 
-        // Start animation loop for particles
-        function animate() {
-            const g = parseInt(document.getElementById('input-glutamine').value);
-            const s = parseInt(document.getElementById('input-starvation').value);
-            
-            // Only redraw animation if the simulator tab is visible
-            const simTab = document.getElementById('sec-simulator');
-            if (simTab && !simTab.classList.contains('hidden')) {
-                drawCell(g, s);
-            }
-            requestAnimationFrame(animate);
-        }
-
-        // ==========================================
-        // 5. INITIALIZATION
-        // ==========================================
-        window.addEventListener('load', () => {
-            // Initialize Charts
-            initCharts();
-            
-            // Set initial state
-            updateSimulation();
-            
-            // Start particle animation
-            animate();
-        });
+        // Init
+        window.onload = () => {
+            updateEngine();
+        };
     </script>
 </body>
 </html>
